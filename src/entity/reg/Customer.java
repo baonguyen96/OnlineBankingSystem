@@ -1,10 +1,5 @@
-package domain.login;
+package entity.reg;
 
-/**
- * 
- * @author mehra
- *
- */
 public class Customer {
 
     private String username;

@@ -1,4 +1,8 @@
-package domain.login;
+package dao;
+
+import entity.reg.Customer;
+import entity.staging.Login;
+
 /**
  * 
  * @author mehra

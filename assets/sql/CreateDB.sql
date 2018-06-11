@@ -13,7 +13,7 @@ USE `cs6359`;
 CREATE TABLE IF NOT EXISTS `cs6359`.`users` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(50) NOT NULL,
-  `password` VARCHAR(50) NOT NULL,
+  `password` VARCHAR(300) NOT NULL,
   `full_name` VARCHAR(100) NOT NULL,
   `recover_password_question` varchar(300) NOT NULL,
   `recover_password_answer` varchar(300) NOT NULL,
@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS `cs6359`.`transactions` (
   `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`transaction_id`));
 
-CREATE TABLE `accounts` (
-   `account_id` int(11) NOT NULL AUTO_INCREMENT,
-   `user_id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `accounts` (
+   `account_id` INT NOT NULL AUTO_INCREMENT,
+   `user_id` INT NOT NULL,
    `balance` decimal(65,2) NOT NULL,
    `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
    PRIMARY KEY (`account_id`)); 
