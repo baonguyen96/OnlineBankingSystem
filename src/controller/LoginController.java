@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import dao.CustomerDao;
-import entity.reg.Customer;
+import dao.UserDao;
+import entity.reg.UserAccount;
 import entity.staging.Login;
-import service.CustomerDaoImpl;
+import service.UserAccountImpl;
 
 
 @WebServlet("/")
@@ -28,25 +28,25 @@ public class LoginController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 
-	CustomerDao customerDao = new CustomerDaoImpl();
+	UserDao userDao = new UserAccountImpl();
 
 	String username = request.getParameter("username");
 	String pass = request.getParameter("password");
 	String submitType = request.getParameter("submit");
 	Login login = new Login(username, pass);
-	Customer c = customerDao.validateCustomer(login);
+	UserAccount user = userDao.validateCustomer(login);
 
-	if (submitType.equals("login") && c != null && c.getName() != null) {
-	    request.setAttribute("message", "Hello " + c.getName());
+	if (submitType.equals("login") && user != null && user.getName() != null) {
+	    request.setAttribute("message", "Hello " + user.getName());
 	    request.getRequestDispatcher("welcome.jsp").forward(request, response);
 	}
 	else if (submitType.equals("register")) {
-	    c.setName(request.getParameter("name"));
-	    c.setUsername(request.getParameter("username"));
-	    c.setPassword(request.getParameter("password"));
-	    c.setRecoverPasswordQuestion(request.getParameter("recover-password-question"));
-	    c.setRecoverPasswordAnswer(request.getParameter("recover-password-answer"));
-	    customerDao.register(c);
+	    user.setName(request.getParameter("name"));
+	    user.setUsername(request.getParameter("username"));
+	    user.setPassword(request.getParameter("password"));
+	    user.setRecoverPasswordQuestion(request.getParameter("recover-password-question"));
+	    user.setRecoverPasswordAnswer(request.getParameter("recover-password-answer"));
+	    userDao.register(user);
 	    request.setAttribute("successMessage", "Registration done, please login!");
 	    request.getRequestDispatcher("login.jsp").forward(request, response);
 	}

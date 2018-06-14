@@ -1,12 +1,28 @@
 package entity.reg;
 
-public class Customer {
+import java.util.LinkedList;
 
+
+public class UserAccount {
+
+    private int userID;
     private String username;
     private String password;
     private String name;
     private String recoverPasswordQuestion;
     private String recoverPasswordAnswer;
+    private double balance;
+    private LinkedList<Transaction> transactions;
+
+
+    public int getUserID() {
+	return userID;
+    }
+
+
+    public void setUserID(int userID) {
+	this.userID = userID;
+    }
 
 
     public String getUsername() {
@@ -39,29 +55,43 @@ public class Customer {
     }
 
 
-    
     public String getRecoverPasswordQuestion() {
-        return recoverPasswordQuestion;
+	return recoverPasswordQuestion;
     }
 
 
-    
     public void setRecoverPasswordQuestion(String recoverPasswordQuestion) {
-        this.recoverPasswordQuestion = recoverPasswordQuestion;
+	this.recoverPasswordQuestion = recoverPasswordQuestion;
     }
 
 
-    
     public String getRecoverPasswordAnswer() {
-        return recoverPasswordAnswer;
+	return recoverPasswordAnswer;
     }
 
 
-    
     public void setRecoverPasswordAnswer(String recoverPasswordAnswer) {
-        this.recoverPasswordAnswer = recoverPasswordAnswer;
+	this.recoverPasswordAnswer = recoverPasswordAnswer;
     }
-    
-    
+
+
+    public double getBalance() {
+	return balance;
+    }
+
+
+    public void setBalance(double balance) {
+	this.balance = balance;
+    }
+
+
+    public LinkedList<Transaction> getTransactions() {
+	return transactions;
+    }
+
+
+    public void setTransactions(LinkedList<Transaction> transactions) {
+	this.transactions = transactions;
+    }
 
 }
