@@ -12,13 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import core.JsonServletBase;
 import dao.UserDaoImpl;
-import domain.UserAccount;
+import domain.User;
 
 /**
  * Servlet implementation class Login
  */
 @WebServlet("/api/user")
-public class UserController extends JsonServletBase<UserAccount> {
+public class UserController extends JsonServletBase<User> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(UserController.class.getName());
     private static final String SUCCESS_STATUS = "Success";
@@ -34,12 +34,12 @@ public class UserController extends JsonServletBase<UserAccount> {
     }
 
     @Override
-    protected UserAccount processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
+    protected User processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
         return null;
     }
 
     @Override
-    protected Collection<UserAccount> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected Collection<User> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         return null;
     }
 
@@ -47,7 +47,7 @@ public class UserController extends JsonServletBase<UserAccount> {
      * Provides the CREATE (New User Registration) action 
      */
     @Override
-    protected UserAccount processPost(HttpServletRequest request, HttpServletResponse response, UserAccount user) throws ServletException, IOException {
+    protected User processPost(HttpServletRequest request, HttpServletResponse response, User user) throws ServletException, IOException {
         LOG.log(Level.INFO, user.toString());
 
         if (user.getUsername() == null //
@@ -58,7 +58,7 @@ public class UserController extends JsonServletBase<UserAccount> {
 
             user.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
         } else {
-            UserAccount registeredUser = new UserDaoImpl().register(user);
+            User registeredUser = new UserDaoImpl().register(user);
             if (createNewUserSession(request, user)) {
                 user = registeredUser;
                 user.setStatus(SUCCESS_STATUS);
@@ -72,12 +72,12 @@ public class UserController extends JsonServletBase<UserAccount> {
     }
 
     @Override
-    protected UserAccount processPut(HttpServletRequest request, HttpServletResponse response, UserAccount putObject) throws ServletException, IOException {
+    protected User processPut(HttpServletRequest request, HttpServletResponse response, User putObject) throws ServletException, IOException {
         return null;
     }
 
     @Override
-    protected void processDelete(HttpServletRequest request, HttpServletResponse response, UserAccount deleteObject) throws ServletException, IOException {
+    protected void processDelete(HttpServletRequest request, HttpServletResponse response, User deleteObject) throws ServletException, IOException {
     }
 
 }

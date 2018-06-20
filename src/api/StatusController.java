@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import core.JsonServletBase;
 import domain.Status;
-import domain.UserAccount;
+import domain.User;
 
 /**
  * Servlet implementation class Login
@@ -31,14 +31,12 @@ public class StatusController extends JsonServletBase<Status> {
     protected Status processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
         Status status = null;
 
-        UserAccount user = getUserFromSession(request);
+        User user = getUserFromSession(request);
         if (user != null) {
-            System.out.println("User is not null, creating status obj; user: " + user.toString());
             status = new Status();
             status.setUserName(user.getUsername());
         }
 
-        System.out.println("returning status object; status: " + status);
         return status;
     }
 

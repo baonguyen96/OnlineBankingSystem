@@ -1,15 +1,15 @@
 package dao;
 
 import domain.Login;
-import domain.UserAccount;
+import domain.User;
 
 public interface UserDao {
 
-    public UserAccount register(UserAccount u);
+    public User register(User u);
 
     /*
      * Retrieve the Customer object from the database
      */
-    public UserAccount validateCustomer(Login login);
+    public User validateCustomer(Login login);
 
 }

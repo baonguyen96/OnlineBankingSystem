@@ -18,7 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
-import domain.UserAccount;
+import domain.User;
 
 public abstract class JsonServletBase<T extends Object> extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -42,7 +42,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @param user A populated non-null and valid user object
      * @return true if the user session was created successfully, otherwise false
      */
-    protected boolean createNewUserSession(HttpServletRequest request, UserAccount user) {
+    protected boolean createNewUserSession(HttpServletRequest request, User user) {
         boolean successful = false;
         if (request != null //
                 && user != null //
@@ -58,16 +58,16 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
         return successful;
     }
 
-    protected UserAccount getUserFromSession(HttpServletRequest request) {
-        UserAccount user = null;
+    protected User getUserFromSession(HttpServletRequest request) {
+        User user = null;
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object sessUser = session.getAttribute(SessionConstants.USER);
-            if (sessUser != null && sessUser instanceof UserAccount) {
-                user = (UserAccount) sessUser;
+            if (sessUser != null && sessUser instanceof User) {
+                user = (User) sessUser;
                 LOG.info("getUserFromSession(): " + user.toString());
             } else {
-                LOG.log(Level.SEVERE, "There's an active session (" + session.getId() + "), but no valid UserAccount object in it");
+                LOG.log(Level.SEVERE, "There's an active session (" + session.getId() + "), but no valid User object in it");
             }
         } else {
             LOG.info("getUserFromSession(): No active session, returning null");
@@ -144,7 +144,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
         LOG.log(Level.INFO, "doGet(): BEGIN; Path: " + request.getServletPath());
 
         HttpSession session = request.getSession(false);
-        UserAccount user = getUserFromSession(request);
+        User user = getUserFromSession(request);
         LOG.info("doGet(): Session ID: " + ((session != null) ? session.getId() : "null") + "; User: " + ((user != null) ? user.getUsername() : "null"));
 
         if (requireValidSession() && session == null) {

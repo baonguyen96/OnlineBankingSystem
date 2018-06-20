@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import core.DBUtils;
 import db.DbManager;
 import domain.Login;
-import domain.UserAccount;
+import domain.User;
 import util.Utilities;
 
 public class UserDaoImpl implements UserDao {
@@ -19,10 +19,10 @@ public class UserDaoImpl implements UserDao {
     private DbManager db = new DbManager();
 
     /**
-     * Attempts to create a new UserAccount, returns the UserAccount if it succeeds or null if it fails
+     * Attempts to create a new User, returns the User if it succeeds or null if it fails
      */
     @Override
-    public UserAccount register(UserAccount user) {
+    public User register(User user) {
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -33,7 +33,7 @@ public class UserDaoImpl implements UserDao {
             user.setPassword(Utilities.hash(user.getPassword()));
 
             conn = db.getConnection();
-            ps = conn.prepareStatement("INSERT INTO user_accounts " //
+            ps = conn.prepareStatement("INSERT INTO user " //
                     + "(user_id, username, password, full_name, recover_password_question, recover_password_answer, balance) " //
                     + "value (?, ?, ?, ?, ?, ?, ?);");
 
@@ -72,25 +72,25 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
-     * Validates the Login and returns the UserAccount if it succeeds or null on failure.
+     * Validates the Login and returns the User if it succeeds or null on failure.
      */
     @Override
-    public UserAccount validateCustomer(Login login) {
+    public User validateCustomer(Login login) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        UserAccount user = null;
+        User user = null;
 
         try {
             conn = db.getConnection();
-            ps = conn.prepareStatement("SELECT user_id, username, full_name, recover_password_question, balance FROM user_accounts WHERE username = ? AND password = ?");
+            ps = conn.prepareStatement("SELECT user_id, username, full_name, recover_password_question, balance FROM user WHERE username = ? AND password = ?");
             ps.setString(1, login.getUsername());
             ps.setString(2, Utilities.hash(login.getPassword()));
 
             rs = ps.executeQuery();
             if (rs.next()) {
-                user = new UserAccount();
+                user = new User();
                 user.setUserID(rs.getLong("user_id"));
                 user.setUsername(rs.getString("username"));
                 user.setName(rs.getString("full_name"));

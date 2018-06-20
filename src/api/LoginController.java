@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import core.JsonServletBase;
 import dao.UserDaoImpl;
 import domain.Login;
-import domain.UserAccount;
+import domain.User;
 
 /**
  * Servlet implementation class Login
@@ -53,7 +53,7 @@ public class LoginController extends JsonServletBase<Login> {
         if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
             loginRequest.setStatus(INVALID_STATUS);
         } else {
-            UserAccount user = new UserDaoImpl().validateCustomer(loginRequest);
+            User user = new UserDaoImpl().validateCustomer(loginRequest);
             if (createNewUserSession(request, user)) {
                 loginRequest.setStatus(SUCCESS_STATUS);
             } else {

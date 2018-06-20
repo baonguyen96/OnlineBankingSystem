@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-public class UserAccount {
+public class User {
 
     private Long userID;
     private String username;
@@ -97,8 +97,8 @@ public class UserAccount {
 
     @Override
     public String toString() {
-        return "UserAccount [userID=" + userID + ", username=" + username + ", password=" + password + ", name=" + name + ", recoverPasswordQuestion=" + recoverPasswordQuestion + ", recoverPasswordAnswer=" + recoverPasswordAnswer + ", balance="
-                + balance + ", status=" + status + "]";
+        return "User [userID=" + userID + ", username=" + username + ", password=" + password + ", name=" + name + ", recoverPasswordQuestion=" + recoverPasswordQuestion + ", recoverPasswordAnswer=" + recoverPasswordAnswer + ", balance=" + balance
+                + ", status=" + status + "]";
     }
 
 }
