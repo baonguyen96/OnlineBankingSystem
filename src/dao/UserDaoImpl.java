@@ -1,6 +1,5 @@
 package dao;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,8 +33,8 @@ public class UserDaoImpl implements UserDao {
 
             conn = db.getConnection();
             ps = conn.prepareStatement("INSERT INTO user " //
-                    + "(id, username, password, full_name, recover_password_question, recover_password_answer, balance) " //
-                    + "value (?, ?, ?, ?, ?, ?, ?);");
+                    + "(id, username, password, full_name, recover_password_question, recover_password_answer) " //
+                    + "value (?, ?, ?, ?, ?, ?);");
 
             int i = 1; // sql param index
 
@@ -45,18 +44,17 @@ public class UserDaoImpl implements UserDao {
             ps.setString(i++, user.getName());
             ps.setString(i++, user.getRecoverPasswordQuestion());
             ps.setString(i++, user.getRecoverPasswordAnswer());
-            ps.setBigDecimal(i++, new BigDecimal(0)); // initial starting balance of 0
 
             status = ps.executeUpdate();
 
             if (status == 1) {
-                user.setUserID(DBUtils.getLastInsertId(conn));
+                user.setId(DBUtils.getLastInsertId(conn));
 
                 // Clearing because security!
                 user.setPassword(null);
                 user.setRecoverPasswordAnswer(null);
 
-                LOG.log(Level.INFO, "Registered user " + user.getUsername() + " with id " + user.getUserID());
+                LOG.log(Level.INFO, "Registered user " + user.getUsername() + " with id " + user.getId());
             } else {
                 LOG.log(Level.INFO, "Failed to register user " + user.getUsername());
                 user = null;
@@ -84,18 +82,18 @@ public class UserDaoImpl implements UserDao {
 
         try {
             conn = db.getConnection();
-            ps = conn.prepareStatement("SELECT id, username, full_name, recover_password_question, balance FROM user WHERE username = ? AND password = ?");
+            ps = conn.prepareStatement("SELECT id, username, full_name, recover_password_question FROM user WHERE username = ? AND password = ?");
             ps.setString(1, login.getUsername());
             ps.setString(2, Utilities.hash(login.getPassword()));
 
             rs = ps.executeQuery();
             if (rs.next()) {
                 user = new User();
-                user.setUserID(rs.getLong("id"));
+                user.setId(rs.getLong("id"));
                 user.setUsername(rs.getString("username"));
                 user.setName(rs.getString("full_name"));
                 user.setRecoverPasswordQuestion(rs.getString("recover_password_question"));
-                user.setBalance(rs.getDouble("balance"));
+
                 // It's bad security to load these back out of the database
                 // user.setPassword(rs.getString("password"));
                 // user.setRecoverPasswordAnswer(rs.getString("recover_password_answer"));

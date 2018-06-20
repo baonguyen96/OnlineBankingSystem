@@ -1,15 +1,16 @@
 package domain;
 
-import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-public class User {
+import core.DbBaseObject;
 
-    private Long userID;
+public class User extends DbBaseObject {
+
     private String username;
 
     @JsonProperty(access = Access.WRITE_ONLY)
@@ -19,17 +20,12 @@ public class User {
 
     @JsonProperty(access = Access.WRITE_ONLY)
     private String recoverPasswordAnswer;
-    private double balance;
-    private LinkedList<Transaction> transactions;
+    private List<Account> accounts;
+
+    /**
+     * Used for returning API call Status Information
+     */
     private String status = null;
-
-    public Long getUserID() {
-        return userID;
-    }
-
-    public void setUserID(Long userID) {
-        this.userID = userID;
-    }
 
     public String getUsername() {
         return username;
@@ -71,20 +67,12 @@ public class User {
         this.recoverPasswordAnswer = StringUtils.trimToNull(recoverPasswordAnswer);
     }
 
-    public double getBalance() {
-        return balance;
+    public List<Account> getAccounts() {
+        return accounts;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public LinkedList<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(LinkedList<Transaction> transactions) {
-        this.transactions = transactions;
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 
     public String getStatus() {
@@ -97,8 +85,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [userID=" + userID + ", username=" + username + ", password=" + password + ", name=" + name + ", recoverPasswordQuestion=" + recoverPasswordQuestion + ", recoverPasswordAnswer=" + recoverPasswordAnswer + ", balance=" + balance
-                + ", status=" + status + "]";
+        return "User [iD=" + id + ", username=" + username + ", password=" + password + ", name=" + name + ", recoverPasswordQuestion=" + recoverPasswordQuestion + ", recoverPasswordAnswer=" + recoverPasswordAnswer + ", status=" + status + "]";
     }
 
 }

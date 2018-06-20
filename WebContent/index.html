@@ -198,53 +198,63 @@
 				</div>
 			</div>
 		</div>
-	</div>
 	
-	<div id="accountsHomeScreen" name="loggedOutMenu">
-		<div class="row">
-			<div class="col-md-3"></div>
-			<div class="col-md-6">
-					<h3>Account Home</h3>
+		<div id="accountsHomeScreen" name="loggedOutMenu">
+			<div class="row">
+				<div class="col-md-2"></div>
+				<div class="col-md-7 ">
+					<h3>Accounts Home</h3>
+				</div>
+				<div class="col-md-2">
+					<button id="createNewAccountButton" class="btn btn-primary">Create New Account</button>
+				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-4"></div>
-			<div class="col-md-6">
-				<b>The premiere provider of Secure Online Banking</b>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">&nbsp;</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">&nbsp;</div>
-		</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+
+			<div id="noAccountsAlert" class="alert alert-warning" role="alert" style="display: none"></div>
+			<div id="overdrawnAccountAlert" class="alert alert-danger" role="alert" style="display: none"></div>
+			<nav>
+				<ul id="accountsList">
+				</ul>
+			</nav>
 			
-		<div class="row">
-			<div class="col-md-2"></div>
-			<div class="col-md-3">
-				New to online banking & BankChain?  Register now to securly set up your free online bank account!
-			</div>
-			<div class="col-md-2"></div>
-			<div class="col-md-3">
-				Already have your account set up?  Well, go ahead and log in!
-			</div>
-			<div class="col-md-2"></div>
-		</div>
-		<div class="row">
-			<div class="col-md-3"></div>
-			<div class="col-md-2">
-				<button id="registerButton" type="button" class="btn btn-lg btn-primary pull-down">Sign-Up</button>
-			</div>
-			<div class="col-md-3"></div>
-			<div class="col-md-2">
-				<button type="button" class="loginButton btn btn-lg btn-primary pull-down">Login</button>
-			</div>
-			<div class="col-md-2"></div>
 		</div>
 	</div>
 
-				
+	<div id="createAccountModal" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-lg">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Create Account</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-md-9">
+							<form>
+								<div class="form-group">
+									<label for="createAccountName">Account Name:</label>
+									<input type="text" class="form-control" id="createAccountName" aria-describedby="usernameHelp" placeholder="Something meaningful to you.  Maybe Slush Fund?">
+								</div>
+								<button id="createAccountSubmitButton" class="btn btn-primary">Submit</button>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+					
 	<script src="js/jquery-1.12.4.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/typeahead.bundle.js"></script>

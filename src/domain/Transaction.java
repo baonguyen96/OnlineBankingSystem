@@ -1,32 +1,18 @@
 package domain;
 
-public class Transaction {
+import core.DbBaseObject;
 
-    protected static class TransactionType {
-        public static final String DEPOSIT = "Deposit";
-        public static final String WITHDRAW = "Withdraw";
-        public static final String TRANSFER_ADD = "Transfer - Send";
-        public static final String TRANSFER_RECEIVE = "Transfer - Receive";
-    }
+public class Transaction extends DbBaseObject {
 
-    protected int userID;
-    protected String transactionType;
+    protected TransactionType type;
     protected double amount;
 
-    public int getUserID() {
-        return userID;
+    public TransactionType getType() {
+        return type;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String type) {
-        this.transactionType = type;
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public double getAmount() {

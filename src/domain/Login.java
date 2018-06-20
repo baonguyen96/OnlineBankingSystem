@@ -10,6 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 public class Login {
     private String username = null;
     private String password = null;
+
+    /**
+     * Used for returning API call Status Information
+     */
     private String status = null;
 
     public Login() {

@@ -43,8 +43,7 @@ $(document).ready(function() {
 	});
 	
 	$(".menuMyAccounts").click(function() {
-		resetAll();
-		$("#accountsHomeScreen").show();
+		loadAndShowAccounts();
 	});
 	
 	$("#logoutButton").click(function() {
@@ -70,6 +69,14 @@ $(document).ready(function() {
 	$("#registerSubmitButton").click(function() {
 		console.log("registerSubmitButton");
 		processRegistrationRequest();
+	});
+
+	$("#createNewAccountButton").click(function() {
+		$("#createAccountModal").modal();
+	});
+
+	$("#createAccountSubmitButton").click(function() {
+		processCreateAccount();
 	});
 });
 
@@ -113,8 +120,7 @@ function checkLoginStatus() {
 				$("[name='loggedOutMenu']").hide();
 				console.log(res);
 				loggedIn = true;
-				resetAll();
-				$("#accountsHomeScreen").show();
+				loadAndShowAccounts();
 			} else {
 				loggedIn = false;	
 				resetAll();
@@ -177,9 +183,7 @@ function processLoginRequest() {
 				$("[name='loggedOutMenu']").hide();
 				$("[name='loggedInMenu']").show();
 				$("#loginAlert").hide();
-				loggedIn = true;
-				resetAll();
-				$("#accountsHomeScreen").show();
+				loadAndShowAccounts();
 			} else {
 				$("[name='loggedInMenu']").hide();
 				$("[name='loggedOutMenu']").show();
@@ -223,7 +227,7 @@ function processRegistrationRequest() {
 	};
 
 	$.ajax({
-		url: baseServerUrl + '/api/user',
+		url: baseServerUrl + '/api/register',
 		type: 'POST',
 		data: JSON.stringify(userRequest),
 		dataType: 'json',
@@ -236,8 +240,7 @@ function processRegistrationRequest() {
 				$("[name='loggedOutMenu']").hide();
 				$("#registerAlert").hide();
 				loggedIn = true;
-				resetAll();
-				$("#accountsHomeScreen").show();
+				loadAndShowAccounts();
 			} else { // NOT SUCCESS
 				$("[name='loggedInMenu']").hide();
 				$("[name='loggedOutMenu']").show();
@@ -263,4 +266,83 @@ function processRegistrationRequest() {
 			$("#registerScreen").show();
 	}
 	});
+}
+
+function loadAndShowAccounts() {
+	$.ajax({
+		url: baseServerUrl + '/api/account',
+		type: 'GET',
+		data: null, 
+		dataType: 'json',
+		contentType: "application/json",
+		success:function(accounts){
+			console.log(JSON.stringify(accounts));
+			accountsList = $("#accountsList");
+        	accountsList.empty();
+			
+			var html = "<div class='row alert-info'>";
+			html += "<div class='col-md-2'><strong>Name</strong></div>";
+			html += "<div class='col-md-2'><strong>Last Updated</strong></div>";
+			html += "<div class='col-md-2'><strong>Balance</strong></div>";
+			html += "</div>";
+			$(html).appendTo(accountsList);
+			
+			$(accounts).each(function() {
+				var row = $("<div class='row'></div>");
+				$("<div class='col-md-2'>" + this.name + "</div>").appendTo(row);
+				$("<div class='col-md-2'>" + new Date(this.updatedOn).toLocaleString() + "</div>").appendTo(row);
+				$("<div class='col-md-2'>" + this.balance + "</div>").appendTo(row);
+
+				$(row).appendTo(accountsList);
+			});
+		},
+		error:function(res, textStatus) {
+			console.log(JSON.stringify(res));
+			console.log(textStatus);
+		}
+	});
+
+	resetAll();
+	$("#accountsHomeScreen").show();
+}
+
+function processCreateAccount() {
+	name = $("#createAccountName").val();
+
+	accountRequest = {
+		"name":name
+	};
+
+	$.ajax({
+		url: baseServerUrl + '/api/account',
+		type: 'POST',
+		data: JSON.stringify(accountRequest),
+		dataType: 'json',
+		contentType: "application/json",
+		success:function(res){
+			console.log(JSON.stringify(res));
+			console.log(res.status + '; ' + typeof res.status);
+			if (res.status === "Success") {
+				$('#createAccountModal').modal('toggle');
+				loadAndShowAccounts();
+			} else { // NOT SUCCESS
+				console.log(JSON.stringify(res));
+			}
+		},
+		error:function(res, textStatus) { // NOT SUCCESS
+			console.log(JSON.stringify(res));
+			console.log(textStatus);
+			$("[name='loggedInMenu']").hide();
+			$("[name='loggedOutMenu']").show();
+			registerAlertDiv = $("#registerAlert");
+			registerAlertDiv.empty();
+			$('<span>Error processing request, please try again</span>').appendTo(registerAlertDiv);
+			registerAlertDiv.show();
+			loggedIn = false;
+			resetAll();
+			$("#registerScreen").show();
+	}
+	});
+
+	$("#createAccountName").val('');
 }

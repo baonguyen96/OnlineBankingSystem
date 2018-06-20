@@ -46,7 +46,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
         boolean successful = false;
         if (request != null //
                 && user != null //
-                && user.getUserID() != null //
+                && user.getId() != null //
                 && user.getUsername() != null //
                 && user.getName() != null) {
             HttpSession session = request.getSession();
