@@ -9,12 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import core.JsonServletBase;
-import core.SessionConstants;
 import dao.UserDaoImpl;
-import dao.UserDao;
 import domain.UserAccount;
 
 /**
@@ -47,7 +44,7 @@ public class UserController extends JsonServletBase<UserAccount> {
     }
 
     /**
-     * Provides the CREATE action 
+     * Provides the CREATE (New User Registration) action 
      */
     @Override
     protected UserAccount processPost(HttpServletRequest request, HttpServletResponse response, UserAccount user) throws ServletException, IOException {
@@ -57,23 +54,13 @@ public class UserController extends JsonServletBase<UserAccount> {
                 || user.getPassword() == null //
                 || user.getName() == null //
                 || user.getRecoverPasswordQuestion() == null //
-                || user.getRecoverPasswordAnswer() == null //
-        ) {
+                || user.getRecoverPasswordAnswer() == null) {
+
             user.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
         } else {
-            UserDao userDao = new UserDaoImpl();
-            user.setName(request.getParameter("name"));
-            user.setUsername(request.getParameter("username"));
-            user.setPassword(request.getParameter("password"));
-            user.setRecoverPasswordQuestion(request.getParameter("recover-password-question"));
-            user.setRecoverPasswordAnswer(request.getParameter("recover-password-answer"));
-            UserAccount registeredUser = userDao.register(user);
-            if (registeredUser != null) {
+            UserAccount registeredUser = new UserDaoImpl().register(user);
+            if (createNewUserSession(request, user)) {
                 user = registeredUser;
-
-                HttpSession session = request.getSession();
-                session.setAttribute(SessionConstants.USER, user);
-
                 user.setStatus(SUCCESS_STATUS);
             } else {
                 user.setStatus(REGISTRATION_FAILED_STATUS);

@@ -52,7 +52,7 @@
 									aria-expanded="false">My Profile <span class="caret"></span></a>
 									<ul id="profileList" class="dropdown-menu">
 										<li><a href="#">Update Profile</a></li>
-										<li><a href="#">Logout</a></li>
+										<li><a id="logoutButton" href="#">Logout</a></li>
 									</ul></li>
 							</ul>
 						</span>
@@ -70,8 +70,8 @@
 		</div>
 	</header>
 	<div class="container">
-		<div id="welcomeScreen" name="loggedOutMenu">
 
+		<div id="welcomeScreen">
 			<div class="row">
 				<div class="col-md-3"></div>
 				<div class="col-md-6">
@@ -147,6 +147,7 @@
 				</div>
 			</div>
 		</div>
+
 		<div id="registerScreen">
 			<div class="row">
 				<div class="col-md-4"></div>
@@ -199,6 +200,51 @@
 		</div>
 	</div>
 	
+	<div id="accountsHomeScreen" name="loggedOutMenu">
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+					<h3>Account Home</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-4"></div>
+			<div class="col-md-6">
+				<b>The premiere provider of Secure Online Banking</b>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">&nbsp;</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">&nbsp;</div>
+		</div>
+			
+		<div class="row">
+			<div class="col-md-2"></div>
+			<div class="col-md-3">
+				New to online banking & BankChain?  Register now to securly set up your free online bank account!
+			</div>
+			<div class="col-md-2"></div>
+			<div class="col-md-3">
+				Already have your account set up?  Well, go ahead and log in!
+			</div>
+			<div class="col-md-2"></div>
+		</div>
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-2">
+				<button id="registerButton" type="button" class="btn btn-lg btn-primary pull-down">Sign-Up</button>
+			</div>
+			<div class="col-md-3"></div>
+			<div class="col-md-2">
+				<button type="button" class="loginButton btn btn-lg btn-primary pull-down">Login</button>
+			</div>
+			<div class="col-md-2"></div>
+		</div>
+	</div>
+
+				
 	<script src="js/jquery-1.12.4.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/typeahead.bundle.js"></script>

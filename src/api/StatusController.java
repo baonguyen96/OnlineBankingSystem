@@ -7,10 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import core.JsonServletBase;
-import core.SessionConstants;
 import domain.Status;
 import domain.UserAccount;
 
@@ -26,22 +24,21 @@ public class StatusController extends JsonServletBase<Status> {
 
     @Override
     protected boolean requireValidSession() {
-        return true;
+        return false;
     }
 
     @Override
     protected Status processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
         Status status = null;
 
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            UserAccount user = (UserAccount) session.getAttribute(SessionConstants.USER);
-            if (user != null) {
-                status = new Status();
-                status.setUserName(user.getUsername());
-            }
+        UserAccount user = getUserFromSession(request);
+        if (user != null) {
+            System.out.println("User is not null, creating status obj; user: " + user.toString());
+            status = new Status();
+            status.setUserName(user.getUsername());
         }
 
+        System.out.println("returning status object; status: " + status);
         return status;
     }
 

@@ -4,13 +4,20 @@ import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
 public class UserAccount {
 
     private Long userID;
     private String username;
+
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
     private String name;
     private String recoverPasswordQuestion;
+
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String recoverPasswordAnswer;
     private double balance;
     private LinkedList<Transaction> transactions;

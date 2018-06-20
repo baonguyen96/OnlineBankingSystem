@@ -1,5 +1,6 @@
 package dao;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,12 +33,20 @@ public class UserDaoImpl implements UserDao {
             user.setPassword(Utilities.hash(user.getPassword()));
 
             conn = db.getConnection();
-            ps = conn.prepareStatement("INSERT INTO user_accounts " + "(username, password, full_name, recover_password_question, recover_password_answer, balance) " + "value ('?', '?', '?', '', '', 0);");
-            ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPassword());
-            ps.setString(3, user.getName());
-            ps.setString(4, user.getRecoverPasswordQuestion());
-            ps.setString(5, user.getRecoverPasswordAnswer());
+            ps = conn.prepareStatement("INSERT INTO user_accounts " //
+                    + "(user_id, username, password, full_name, recover_password_question, recover_password_answer, balance) " //
+                    + "value (?, ?, ?, ?, ?, ?, ?);");
+
+            int i = 1; // sql param index
+
+            ps.setLong(i++, 0L); // auto-increment user_id
+            ps.setString(i++, user.getUsername());
+            ps.setString(i++, user.getPassword());
+            ps.setString(i++, user.getName());
+            ps.setString(i++, user.getRecoverPasswordQuestion());
+            ps.setString(i++, user.getRecoverPasswordAnswer());
+            ps.setBigDecimal(i++, new BigDecimal(0)); // initial starting balance of 0
+
             status = ps.executeUpdate();
 
             if (status == 1) {

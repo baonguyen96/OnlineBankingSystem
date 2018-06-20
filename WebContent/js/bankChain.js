@@ -2,12 +2,20 @@ var baseServerUrl = "http://localhost:8080/OnlineBankingSystem";
 var loggedIn = false;
 
 function resetAll() {
-	$("[name='loggedInMenu']").hide();
-	$("[name='loggedOutMenu']").show();
+	// set the menu options based on login status
+	if (loggedIn) {
+		$("[name='loggedOutMenu']").hide();
+		$("[name='loggedInMenu']").show();
+	} else {
+		$("[name='loggedInMenu']").hide();
+		$("[name='loggedOutMenu']").show();
+	}
 
+	// hide everyting by default
 	$("#welcomeScreen").hide();
 	$("#loginScreen").hide();
 	$("#registerScreen").hide();
+	$("#accountsHomeScreen").hide();
 }
 
 function initialize() {
@@ -28,12 +36,22 @@ $(document).ready(function() {
 	resetAll();
 	initialize();
 
-	
+
 	$(".homeLink").click(function() {
 		resetAll();
 		initialize();
 	});
 	
+	$(".menuMyAccounts").click(function() {
+		resetAll();
+		$("#accountsHomeScreen").show();
+	});
+	
+	$("#logoutButton").click(function() {
+		console.log("logoutButton");
+		processLogoutRequest();
+	});
+
 	$(".loginButton").click(function() {
 		resetAll();
 		$("#loginScreen").show();
@@ -81,20 +99,22 @@ function isValidSSN(value) {
 
 function checkLoginStatus() {
 	$.ajax({
-		url: baseServerUrl + '/api/status',
+		url: baseServerUrl + '/api/status?id=0',
 		type: 'GET',
 		data: null, //JSON.stringify(paginatedRequest),
 		dataType: 'json',
 		contentType: "application/json",
 		success:function(res){
-			if (res && res.username) {
+			console.log(JSON.stringify(res));
+
+			if (res && res.userName) {
 				console.log(res.status);
 				$("[name='loggedInMenu']").show();
 				$("[name='loggedOutMenu']").hide();
 				console.log(res);
 				loggedIn = true;
 				resetAll();
-				$("#loginScreen").show();
+				$("#accountsHomeScreen").show();
 			} else {
 				loggedIn = false;	
 				resetAll();
@@ -106,6 +126,31 @@ function checkLoginStatus() {
 			loggedIn = false;
 			resetAll();
 			$("#welcomeScreen").show();
+		}
+	});
+}
+
+function processLogoutRequest() {
+	username = $("#loginUsername").val();
+	password = $("#loginPassword").val();
+
+	loginRequest = {"username":"logout"};
+
+	$.ajax({
+		url: baseServerUrl + '/api/login',
+		type: 'DELETE',
+		data: JSON.stringify(loginRequest),
+		dataType: 'json',
+		contentType: "application/json",
+		success:function(res){
+			console.log(JSON.stringify(res));
+			loggedIn = false;
+			resetAll();
+			initialize();
+		},
+		error:function(res, textStatus) {
+			console.log(res.status);
+			alert("There was a problem logging you out :(\nPlease try again.");
 		}
 	});
 }
@@ -126,12 +171,15 @@ function processLoginRequest() {
 			console.log(JSON.stringify(res));
 			console.log(res.status);
 			if (res.status === "Success") {
+				$("#loginUsername").val("");
+				$("#loginPassword").val("");
+			
 				$("[name='loggedOutMenu']").hide();
 				$("[name='loggedInMenu']").show();
 				$("#loginAlert").hide();
 				loggedIn = true;
 				resetAll();
-				$("#welcomeScreen").show();
+				$("#accountsHomeScreen").show();
 			} else {
 				$("[name='loggedInMenu']").hide();
 				$("[name='loggedOutMenu']").show();
@@ -182,15 +230,15 @@ function processRegistrationRequest() {
 		contentType: "application/json",
 		success:function(res){
 			console.log(JSON.stringify(res));
-			console.log(res.status);
+			console.log(res.status + '; ' + typeof res.status);
 			if (res.status === "Success") {
-				$("[name='loggedOutMenu']").hide();
 				$("[name='loggedInMenu']").show();
+				$("[name='loggedOutMenu']").hide();
 				$("#registerAlert").hide();
 				loggedIn = true;
 				resetAll();
-				$("#welcomeScreen").show();
-			} else {
+				$("#accountsHomeScreen").show();
+			} else { // NOT SUCCESS
 				$("[name='loggedInMenu']").hide();
 				$("[name='loggedOutMenu']").show();
 				registerAlertDiv = $("#registerAlert");
@@ -202,7 +250,7 @@ function processRegistrationRequest() {
 				$("#registerScreen").show();
 			}
 		},
-		error:function(res, textStatus) {
+		error:function(res, textStatus) { // NOT SUCCESS
 			console.log(res.status);
 			$("[name='loggedInMenu']").hide();
 			$("[name='loggedOutMenu']").show();
