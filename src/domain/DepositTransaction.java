@@ -1,5 +1,4 @@
-package entity.reg;
-
+package domain;
 
 public class DepositTransaction extends Transaction {
     

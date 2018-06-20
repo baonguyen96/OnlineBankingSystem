@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<title>BankChain Secure Online Banking</title>
+
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/typeahead.css" rel="stylesheet">
+<style type="text/css">
+.required:after {
+    content: "*";
+    padding-left:1%;
+    color: red;
+}
+</style>
+</head>
+<body>
+	<header>
+		<div class="container">
+			<nav class="navbar navbar-default">
+				<div class="container-fluid">
+					<!-- Brand and toggle get grouped for better mobile display -->
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed"
+							data-toggle="collapse"
+							data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+							<span class="sr-only">Toggle navigation</span> <span
+								class="icon-bar"></span> <span class="icon-bar"></span> <span
+								class="icon-bar"></span>
+						</button>
+						<a class="navbar-brand homeLink" href="#">BankChain</a>
+					</div>
+
+					<!-- Collect the nav links, forms, and other content for toggling -->
+					<div class="collapse navbar-collapse"
+						id="bs-example-navbar-collapse-1">
+						<ul class="nav navbar-nav">
+							<li class="active homeLink"><a id="menuHome" href="#">Home<span class="sr-only">(current)</span></a></li>
+							<li><a id="menuProducts" href="#">Products</a></li>
+							<li><a id="menuServices" href="#">Services</a></li>
+							<li name="loggedInMenu"><a id="menuMyAccounts" href="#">My Accounts</a></li>
+						</ul>
+						<span name="loggedInMenu">
+							<span id="myProfile" style="padding-left: 20px; margin-top: 14px; display: inline-block;"></span>
+							<ul class="nav navbar-nav navbar-right">
+								<li class="dropdown"><a href="#" class="dropdown-toggle"
+									data-toggle="dropdown" role="button" aria-haspopup="true"
+									aria-expanded="false">My Profile <span class="caret"></span></a>
+									<ul id="profileList" class="dropdown-menu">
+										<li><a href="#">Update Profile</a></li>
+										<li><a href="#">Logout</a></li>
+									</ul></li>
+							</ul>
+						</span>
+						<span name="loggedOutMenu">
+							<ul class="nav navbar-nav navbar-right">
+								<button type="button" style="margin-top: 7px" class="loginButton btn btn-default btn-primary">Log In</button>
+							</ul>
+						</span>
+						
+					</div>
+					<!-- /.navbar-collapse -->
+				</div>
+				<!-- /.container-fluid -->
+			</nav>
+		</div>
+	</header>
+	<div class="container">
+		<div id="welcomeScreen" name="loggedOutMenu">
+
+			<div class="row">
+				<div class="col-md-3"></div>
+				<div class="col-md-6">
+					<h1>Welcome to BankChain<sup>&reg;</sup> Bank</h1>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4"></div>
+				<div class="col-md-6">
+					<b>The premiere provider of Secure Online Banking</b>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+				
+			<div class="row">
+				<div class="col-md-2"></div>
+				<div class="col-md-3">
+					New to online banking & BankChain?  Register now to securly set up your free online bank account!
+				</div>
+				<div class="col-md-2"></div>
+				<div class="col-md-3">
+					Already have your account set up?  Well, go ahead and log in!
+				</div>
+				<div class="col-md-2"></div>
+			</div>
+			<div class="row">
+				<div class="col-md-3"></div>
+				<div class="col-md-2">
+					<button id="registerButton" type="button" class="btn btn-lg btn-primary pull-down">Sign-Up</button>
+				</div>
+				<div class="col-md-3"></div>
+				<div class="col-md-2">
+					<button type="button" class="loginButton btn btn-lg btn-primary pull-down">Login</button>
+				</div>
+				<div class="col-md-2"></div>
+			</div>
+		</div>
+
+		<div id="loginScreen">
+			<div class="row">
+				<div class="col-md-4"></div>
+				<div class="col-md-6">
+					<H3>Please enter your login credentials</h3>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-4">&nbsp;</div>
+				<div class="col-md-4">
+					<form>
+						<div class="form-group">
+							<label for="loginUsername">Username</label>
+							<input type="text" class="form-control" id="loginUsername" aria-describedby="usernameHelp" placeholder="Enter username">
+						</div>
+						<div class="form-group">
+							<label for="loginPassword">Password</label>
+							<input type="password" class="form-control" id="loginPassword" placeholder="Password">
+						</div>
+						<div id="loginAlert" class="alert alert-warning" role="alert" style="display: none"></div>
+						<button id="loginSubmitButton" class="btn btn-primary">Submit</button>
+					</form>				
+				</div>
+			</div>
+		</div>
+		<div id="registerScreen">
+			<div class="row">
+				<div class="col-md-4"></div>
+				<div class="col-md-6">
+					<H3>Welcome to BankChain</h3>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4"></div>
+				<div class="col-md-6">
+					<H4>Please fill out our registration form</h4>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">&nbsp;</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-4">&nbsp;</div>
+				<div class="col-md-4">
+					<form>
+						<div class="form-group">
+							<label for="registerUsername">Username</label>
+							<input type="text" class="form-control" id="registerUsername" aria-describedby="usernameHelp" placeholder="Enter username">
+						</div>
+						<div class="form-group">
+							<label for="registerPassword">Password</label>
+							<input type="password" class="form-control" id="registerPassword" placeholder="Password">
+						</div>
+						<div class="form-group">
+							<label for="registerFullName">Full Name</label>
+							<input type="text" class="form-control" id="registerFullName" aria-describedby="fullnameHelp" placeholder="Enter full name">
+						</div>
+						<div class="form-group">
+							<label for="registerRecoverQuestion">Password Recovery Question</label>
+							<input type="text" class="form-control" id="registerRecoverQuestion" aria-describedby="recoveryQuestionHelp" placeholder="Password recovery question">
+						</div>
+						<div class="form-group">
+							<label for="registerRecoverAnswer">Password Recovery Answer</label>
+							<input type="text" class="form-control" id="registerRecoverAnswer" aria-describedby="recoveryAnswerHelp" placeholder="Password recovery answer">
+						</div>
+						<div id="registerAlert" class="alert alert-warning" role="alert" style="display: none"></div>
+						<button id="registerSubmitButton" class="btn btn-primary">Submit</button>
+					</form>				
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="js/jquery-1.12.4.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/typeahead.bundle.js"></script>
+	<script src="js/bankChain.js"></script>
+</body>
+</html>

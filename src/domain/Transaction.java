@@ -1,4 +1,4 @@
-package entity.reg;
+package domain;
 
 public class Transaction {
 

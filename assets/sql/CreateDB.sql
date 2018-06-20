@@ -5,6 +5,7 @@
  */
 
 -- create new database
+DROP DATABASE IF EXISTS `cs6359`;
 CREATE DATABASE IF NOT EXISTS `cs6359` DEFAULT CHARACTER SET utf8 ;
 
 USE `cs6359`;
@@ -36,3 +37,4 @@ CREATE TABLE IF NOT EXISTS `accounts` (
    `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
    PRIMARY KEY (`account_id`)); 
    */
+select * from user_accounts;

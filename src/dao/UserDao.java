@@ -1,13 +1,11 @@
 package dao;
 
-import entity.reg.UserAccount;
-import entity.staging.Login;
-
+import domain.Login;
+import domain.UserAccount;
 
 public interface UserDao {
 
-    public int register(UserAccount u);
-
+    public UserAccount register(UserAccount u);
 
     /*
      * Retrieve the Customer object from the database
