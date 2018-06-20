@@ -12,22 +12,22 @@ USE `cs6359`;
 
 -- create tables
 CREATE TABLE IF NOT EXISTS `cs6359`.`user` (
-  `user_id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(50) NOT NULL,
   `password` VARCHAR(300) NOT NULL,
   `full_name` VARCHAR(100) NOT NULL,
   `recover_password_question` VARCHAR(300) NOT NULL,
   `recover_password_answer` VARCHAR(300) NOT NULL,
   `balance` DECIMAL(65,2),
-  PRIMARY KEY (`user_id`));
+  PRIMARY KEY (`id`));
 
-CREATE TABLE IF NOT EXISTS `cs6359`.`transactions` (
-  `transaction_id` INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `cs6359`.`transaction` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `type` VARCHAR(50) NOT NULL,	-- Deposit, Withdraw, Transfer - Add, Transfer - Receive 
   `amount` DECIMAL(65,2) NOT NULL,
   `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`transaction_id`));
+  PRIMARY KEY (`id`));
 
 /*
 CREATE TABLE IF NOT EXISTS `accounts` (

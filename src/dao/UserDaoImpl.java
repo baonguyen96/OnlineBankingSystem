@@ -34,12 +34,12 @@ public class UserDaoImpl implements UserDao {
 
             conn = db.getConnection();
             ps = conn.prepareStatement("INSERT INTO user " //
-                    + "(user_id, username, password, full_name, recover_password_question, recover_password_answer, balance) " //
+                    + "(id, username, password, full_name, recover_password_question, recover_password_answer, balance) " //
                     + "value (?, ?, ?, ?, ?, ?, ?);");
 
             int i = 1; // sql param index
 
-            ps.setLong(i++, 0L); // auto-increment user_id
+            ps.setLong(i++, 0L); // auto-increment id
             ps.setString(i++, user.getUsername());
             ps.setString(i++, user.getPassword());
             ps.setString(i++, user.getName());
@@ -84,14 +84,14 @@ public class UserDaoImpl implements UserDao {
 
         try {
             conn = db.getConnection();
-            ps = conn.prepareStatement("SELECT user_id, username, full_name, recover_password_question, balance FROM user WHERE username = ? AND password = ?");
+            ps = conn.prepareStatement("SELECT id, username, full_name, recover_password_question, balance FROM user WHERE username = ? AND password = ?");
             ps.setString(1, login.getUsername());
             ps.setString(2, Utilities.hash(login.getPassword()));
 
             rs = ps.executeQuery();
             if (rs.next()) {
                 user = new User();
-                user.setUserID(rs.getLong("user_id"));
+                user.setUserID(rs.getLong("id"));
                 user.setUsername(rs.getString("username"));
                 user.setName(rs.getString("full_name"));
                 user.setRecoverPasswordQuestion(rs.getString("recover_password_question"));

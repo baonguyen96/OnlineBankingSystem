@@ -4,12 +4,12 @@ USE cs6359;
 INSERT INTO `user` (username, password, full_name, recover_password_question, recover_password_answer, balance) value ('?', '?', '?', '', '', 0);
 
 -- add new transaction
-INSERT INTO transactions (user_id, type, amount) value (2, 'Deposit', 50.00);
+INSERT INTO `transaction` (user_id, type, amount) value (2, 'Deposit', 50.00);
 
 -- update account balance
 UPDATE `user`
 SET balance = balance + 100
-WHERE user_id = 2;
+WHERE id = 2;
 
 -- recover forgotten password
 UPDATE `user`

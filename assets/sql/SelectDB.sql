@@ -2,19 +2,19 @@ USE cs6359;
 
 -- select all from each table
 SELECT * FROM `user`;
-SELECT * FROM transactions;
+SELECT * FROM `transaction`;
 
 -- select top 10 transaction of a particular user
 SELECT *
-FROM transactions 
-WHERE user_id = 1
+FROM `transaction` 
+WHERE id = 1
 ORDER BY date DESC 
 LIMIT 10;
 
 -- view balance of a particular account
 SELECT balance
 FROM `user`
-WHERE user_id = 1;
+WHERE id = 1;
 
 -- log in
 SELECT *
