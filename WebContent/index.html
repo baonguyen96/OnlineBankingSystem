@@ -254,8 +254,37 @@
 			</div>
 		</div>
 	</div>
+						
+	<div id="depositModal" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-lg">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 id="depositModalTitle" class="modal-title">Deposit into</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-md-9">
+							<form>
+								<div class="form-group">
+									<label for="depositModalAmount">Deposit Ammount:</label>
+									<input type="text" class="form-control" id="depositModalAmount" aria-describedby="depositHelp" placeholder="How much money do you want?">
+								</div>
+								<button id="depositSubmitButton" class="btn btn-primary">Submit</button>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 					
-	<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery-1.12.4.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/typeahead.bundle.js"></script>
 	<script src="js/bankChain.js"></script>

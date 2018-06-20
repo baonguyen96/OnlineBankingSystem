@@ -105,4 +105,29 @@ public class AccountDaoImpl {
         return user;
     }
 
+    public void updateBalance(Long account_id) {
+        LOG.info("updating balance for account_id: " + account_id);
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = db.getConnection();
+            String sql = "UPDATE" //
+                    + " account" //
+                    + " inner join" //
+                    + "     (select account_id, COALESCE(sum(amount), 0) as balance from transaction where account_id = ?) currBal" //
+                    + "     on account.id = currBal.account_id"//
+                    + " set account.balance = currBal.balance";
+            System.out.println(sql);
+            ps = conn.prepareStatement(sql);
+            ps.setLong(1, account_id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error updating account balance", e);
+        } finally {
+            DBUtils.closeQuietly(ps, conn);
+        }
+    }
 }

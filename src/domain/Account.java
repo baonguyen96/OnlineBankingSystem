@@ -92,7 +92,7 @@ public class Account extends DbBaseObject {
 
     @Override
     public String toString() {
-        return "Account [userId=" + userId + ", name=" + name + ", balance=" + balance + ", updatedOn=" + updatedOn + ", transactions=" + transactions + ", status=" + status + "]";
+        return "Account [userId=" + userId + ", name=" + name + ", balance=" + balance + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", transactions=" + transactions + ", status=" + status + "]";
     }
 
 }

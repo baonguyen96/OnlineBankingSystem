@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import core.JsonServletBase;
 import dao.AccountDaoImpl;
+import dao.TransactionDaoImpl;
 import domain.Account;
 import domain.User;
 
@@ -37,7 +38,26 @@ public class AccountController extends JsonServletBase<Account> {
 
     @Override
     protected Account processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
-        return null;
+        LOG.info("AccountController.processGetAll(): BEGIN");
+        Account retval = null;
+        User user = getUserFromSession(request);
+        if (user != null) {
+            user = new AccountDaoImpl().loadAccounts(user);
+
+            for (Account account : user.getAccounts()) {
+                if (account.getId() != null && account.getId().equals(id)) {
+                    retval = new TransactionDaoImpl().loadTransactions(account);
+                    retval.setStatus(SUCCESS_STATUS);
+                    break;
+                }
+            }
+
+        } else {
+            LOG.log(Level.SEVERE, "AccountController.processGetAll(): user was unexpectedly null");
+        }
+
+        LOG.info("AccountController.processGetAll(): END");
+        return retval;
     }
 
     @Override

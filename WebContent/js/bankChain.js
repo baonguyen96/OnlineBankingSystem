@@ -78,6 +78,10 @@ $(document).ready(function() {
 	$("#createAccountSubmitButton").click(function() {
 		processCreateAccount();
 	});
+
+	$("#depositSubmitButton").click(function() {
+		processDeposit();		
+	});
 });
 
 function isValidSSN(value) {
@@ -283,7 +287,7 @@ function loadAndShowAccounts() {
 			var html = "<div class='row alert-info'>";
 			html += "<div class='col-md-2'><strong>Name</strong></div>";
 			html += "<div class='col-md-2'><strong>Last Updated</strong></div>";
-			html += "<div class='col-md-2'><strong>Balance</strong></div>";
+			html += "<div class='col-md-1'><strong>Balance</strong></div>";
 			html += "</div>";
 			$(html).appendTo(accountsList);
 			
@@ -291,8 +295,19 @@ function loadAndShowAccounts() {
 				var row = $("<div class='row'></div>");
 				$("<div class='col-md-2'>" + this.name + "</div>").appendTo(row);
 				$("<div class='col-md-2'>" + new Date(this.updatedOn).toLocaleString() + "</div>").appendTo(row);
-				$("<div class='col-md-2'>" + this.balance + "</div>").appendTo(row);
+				$("<div class='col-md-1'>" + this.balance + "</div>").appendTo(row);
+				buttonDiv = $("<div class='col-md-2'></div>")
+				
+				var depositButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' id='createNewAccountButton' class='btn btn-primary btn-link btn-sm'>Deposit</button>")
+				$(depositButton).click(function() {
+					depositModalTitle = $("#depositModalTitle");
+					depositModalTitle.html("Deposit into " + $(this).attr('accountName'));
+					depositModalTitle.attr("accountId", $(this).attr('accountId'));
+					$("#depositModal").modal();
+				})
+				$(depositButton).appendTo(buttonDiv);
 
+				buttonDiv.appendTo(row);
 				$(row).appendTo(accountsList);
 			});
 		},
@@ -341,8 +356,43 @@ function processCreateAccount() {
 			loggedIn = false;
 			resetAll();
 			$("#registerScreen").show();
-	}
+		}
 	});
 
 	$("#createAccountName").val('');
+}
+
+function processDeposit() {
+	accountId = $("#depositModalTitle").attr("accountid");
+	amount = $("#depositModalAmount").val();
+
+	transactionRequest = {
+		"accountId":accountId,
+		"type":"Deposit",
+		"amount":amount
+	};
+
+	$.ajax({
+		url: baseServerUrl + '/api/transaction',
+		type: 'POST',
+		data: JSON.stringify(transactionRequest),
+		dataType: 'json',
+		contentType: "application/json",
+		success:function(res){
+			console.log(JSON.stringify(res));
+			console.log(res.status + '; ' + typeof res.status);
+			if (res.status === "Success") {
+				$('#depositModal').modal('toggle');
+				loadAndShowAccounts();
+			} else { // NOT SUCCESS
+				console.log(JSON.stringify(res));
+			}
+		},
+		error:function(res, textStatus) { // NOT SUCCESS
+			console.log(JSON.stringify(res));
+			console.log(textStatus);
+		}
+	});
+
+	$("#depositModalAmount").val('');		
 }
