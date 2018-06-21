@@ -87,7 +87,7 @@ public class TransactionDaoImpl {
                 Transaction transaction = new Transaction();
                 transaction.setId(rs.getLong("id"));
                 transaction.setAccountId(rs.getLong("account_id"));
-                transaction.setType(TransactionType.valueOf(rs.getString("name")));
+                transaction.setType(TransactionType.valueOf(rs.getString("type")));
                 transaction.setAmount(rs.getBigDecimal("amount"));
                 transaction.setCreatedOn(rs.getDate("created_on"));
                 transaction.setUpdatedOn(rs.getDate("updated_on"));

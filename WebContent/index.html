@@ -283,8 +283,32 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="transactionsModal" class="modal fade" role="dialog">
+			<div class="modal-dialog modal-lg">
+	
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 id="transactionsModalTitle" class="modal-title">Transactions for</h4>
+					</div>
+					<div class="modal-body">
+						<nav>
+							<ul id="transactionsList">
+							</ul>
+						</nav>
 					
-		<script src="js/jquery-1.12.4.min.js"></script>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+						
+		
+	<script src="js/jquery-1.12.4.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/typeahead.bundle.js"></script>
 	<script src="js/bankChain.js"></script>

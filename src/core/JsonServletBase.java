@@ -157,6 +157,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
             String idString = request.getParameter("id");
             String returnJsonString = null;
 
+            LOG.info("id = " + idString);
             if (idString == null) {
                 Collection<T> objectToReturn = processGetAll(request, response);
                 returnJsonString = objectsToJson(objectToReturn);

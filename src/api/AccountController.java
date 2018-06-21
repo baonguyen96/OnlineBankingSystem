@@ -38,14 +38,18 @@ public class AccountController extends JsonServletBase<Account> {
 
     @Override
     protected Account processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
-        LOG.info("AccountController.processGetAll(): BEGIN");
+        LOG.info("AccountController.processGet(): BEGIN");
         Account retval = null;
         User user = getUserFromSession(request);
         if (user != null) {
+            LOG.info("AccountController.processGet(): Loaded User: " + user.getId());
             user = new AccountDaoImpl().loadAccounts(user);
 
             for (Account account : user.getAccounts()) {
+                LOG.info("AccountController.processGet(): Checking account: " + account.getId() + " to see if it's id: " + id);
+
                 if (account.getId() != null && account.getId().equals(id)) {
+                    LOG.info("AccountController.processGet(): Account id matches, loading transactions");
                     retval = new TransactionDaoImpl().loadTransactions(account);
                     retval.setStatus(SUCCESS_STATUS);
                     break;
@@ -56,7 +60,7 @@ public class AccountController extends JsonServletBase<Account> {
             LOG.log(Level.SEVERE, "AccountController.processGetAll(): user was unexpectedly null");
         }
 
-        LOG.info("AccountController.processGetAll(): END");
+        LOG.info("AccountController.processGet(): END");
         return retval;
     }
 

@@ -296,9 +296,9 @@ function loadAndShowAccounts() {
 				$("<div class='col-md-2'>" + this.name + "</div>").appendTo(row);
 				$("<div class='col-md-2'>" + new Date(this.updatedOn).toLocaleString() + "</div>").appendTo(row);
 				$("<div class='col-md-1'>" + this.balance + "</div>").appendTo(row);
-				buttonDiv = $("<div class='col-md-2'></div>")
+				buttonDiv = $("<div class='col-md-1'></div>")
 				
-				var depositButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' id='createNewAccountButton' class='btn btn-primary btn-link btn-sm'>Deposit</button>")
+				var depositButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>Deposit</button>")
 				$(depositButton).click(function() {
 					depositModalTitle = $("#depositModalTitle");
 					depositModalTitle.html("Deposit into " + $(this).attr('accountName'));
@@ -306,7 +306,19 @@ function loadAndShowAccounts() {
 					$("#depositModal").modal();
 				})
 				$(depositButton).appendTo(buttonDiv);
+				buttonDiv.appendTo(row);
 
+				buttonDiv = $("<div class='col-md-1'></div>")
+				var transactionsButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>View Transactions</button>")
+				$(transactionsButton).click(function() {
+					transactionsModalTitle = $("#transactionsModalTitle");
+					transactionsModalTitle.html("Transactions for " + $(this).attr('accountName'));
+					transactionsModalTitle.attr("accountId", $(this).attr('accountId'));
+					$("#transactionsModal").modal();
+					loadAndShowTransactions();
+				})
+				$(transactionsButton).appendTo(buttonDiv);
+				
 				buttonDiv.appendTo(row);
 				$(row).appendTo(accountsList);
 			});
@@ -395,4 +407,41 @@ function processDeposit() {
 	});
 
 	$("#depositModalAmount").val('');		
+}
+
+function loadAndShowTransactions() {
+	transactionsModalTitle = $("#transactionsModalTitle");
+	accountId = transactionsModalTitle.attr("accountId");
+	console.log(accountId);
+
+	$.ajax({
+		url: baseServerUrl + '/api/account',
+		type: 'GET',
+		data: { "id": accountId }, 
+		dataType: 'json',
+		success:function(account){
+			console.log(JSON.stringify(account));
+			transactionsList = $("#transactionsList");
+        	transactionsList.empty();
+			
+			var html = "<div class='row alert-info'>";
+			html += "<div class='col-md-3'><strong>Post Date</strong></div>";
+			html += "<div class='col-md-2'><strong>Type</strong></div>";
+			html += "<div class='col-md-1'><strong>Amount</strong></div>";
+			html += "</div>";
+			$(html).appendTo(transactionsList);
+			
+			$(account.transactions).each(function() {
+				var row = $("<div class='row'></div>");
+				$("<div class='col-md-3'>" + new Date(this.createdOn).toLocaleString() + "</div>").appendTo(row);
+				$("<div class='col-md-2'>" + this.type + "</div>").appendTo(row);
+				$("<div class='col-md-1'>" + this.amount + "</div>").appendTo(row);
+				$(row).appendTo(transactionsList);
+			});
+		},
+		error:function(res, textStatus) {
+			console.log(JSON.stringify(res));
+			console.log(textStatus);
+		}
+	});
 }
