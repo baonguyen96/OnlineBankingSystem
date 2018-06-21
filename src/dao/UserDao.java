@@ -1,17 +1,15 @@
 package dao;
 
-import entity.reg.UserAccount;
-import entity.staging.Login;
-
+import domain.Login;
+import domain.User;
 
 public interface UserDao {
 
-    public int register(UserAccount u);
-
+    public User register(User u);
 
     /*
      * Retrieve the Customer object from the database
      */
-    public UserAccount validateCustomer(Login login);
+    public User validateCustomer(Login login);
 
 }
