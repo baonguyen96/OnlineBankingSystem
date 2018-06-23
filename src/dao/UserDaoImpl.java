@@ -7,10 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import core.DBUtils;
+import core.Utilities;
 import db.DbManager;
 import domain.Login;
 import domain.User;
-import util.Utilities;
 
 public class UserDaoImpl implements UserDao {
     private static final Logger LOG = Logger.getLogger(UserDaoImpl.class.getName());
