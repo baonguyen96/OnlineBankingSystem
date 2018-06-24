@@ -73,7 +73,7 @@ public class UserDaoImpl implements UserDao {
      * Validates the Login and returns the User if it succeeds or null on failure.
      */
     @Override
-    public User validateCustomer(Login login) {
+    public User validateUser(Login login) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -93,10 +93,6 @@ public class UserDaoImpl implements UserDao {
                 user.setUsername(rs.getString("username"));
                 user.setName(rs.getString("full_name"));
                 user.setRecoverPasswordQuestion(rs.getString("recover_password_question"));
-
-                // It's bad security to load these back out of the database
-                // user.setPassword(rs.getString("password"));
-                // user.setRecoverPasswordAnswer(rs.getString("recover_password_answer"));
             }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error validating customer login", e);

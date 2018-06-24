@@ -10,6 +10,6 @@ public interface UserDao {
     /*
      * Retrieve the Customer object from the database
      */
-    public User validateCustomer(Login login);
+    public User validateUser(Login login);
 
 }

@@ -53,7 +53,7 @@ public class LoginController extends JsonServletBase<Login> {
         if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
             loginRequest.setStatus(INVALID_STATUS);
         } else {
-            User user = new UserDaoImpl().validateCustomer(loginRequest);
+            User user = new UserDaoImpl().validateUser(loginRequest);
             if (createNewUserSession(request, user)) {
                 loginRequest.setStatus(SUCCESS_STATUS);
             } else {
