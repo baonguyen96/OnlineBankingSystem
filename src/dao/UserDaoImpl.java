@@ -7,10 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import core.DBUtils;
+import core.Utilities;
 import db.DbManager;
 import domain.Login;
 import domain.User;
-import util.Utilities;
 
 public class UserDaoImpl {
     private static final Logger LOG = Logger.getLogger(UserDaoImpl.class.getName());
@@ -67,7 +67,7 @@ public class UserDaoImpl {
     /**
      * Validates the Login and returns the User if it succeeds or null on failure.
      */
-    public User validateCustomer(Login login) {
+    public User validateUser(Login login) {
         Connection conn = null;
         User user = null;
 

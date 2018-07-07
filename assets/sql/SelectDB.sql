@@ -2,6 +2,7 @@ USE cs6359;
 
 -- select all from each table
 SELECT * FROM `user`;
+SELECT * FROM `account`;
 SELECT * FROM `transaction`;
 
 -- select top 10 transaction of a particular user
