@@ -1,5 +1,7 @@
 package domain;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 /**
  * This class is used to satisfy the API contract for checking the status of a user's session
  * 
@@ -7,14 +9,22 @@ package domain;
  *
  */
 public class Status {
-    private String userName;
+    private String username;
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @JsonGetter(value = "id")
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        return result;
     }
 
 }

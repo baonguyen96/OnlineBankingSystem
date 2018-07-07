@@ -19,9 +19,9 @@ import domain.TransactionType;
 import domain.User;
 
 /**
- * Servlet implementation class Login
+ * Servlet API implementation class TransactionController
  */
-@WebServlet("/api/transaction")
+@WebServlet("/api/users/{userId}/accounts/{accountId}/transactions/{transactionId}")
 public class TransactionController extends JsonServletBase<Transaction> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(TransactionController.class.getName());
@@ -30,16 +30,12 @@ public class TransactionController extends JsonServletBase<Transaction> {
     private static final String REQUIRED_FIELDS_MISSING_STATUS = "Required fields are missing";
 
     public TransactionController() {
+        super();
     }
 
     @Override
     protected boolean requireValidSession() {
         return true;
-    }
-
-    @Override
-    protected Transaction processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
-        return null;
     }
 
     /**
@@ -55,7 +51,9 @@ public class TransactionController extends JsonServletBase<Transaction> {
      */
     @Override
     protected Transaction processPost(HttpServletRequest request, HttpServletResponse response, Transaction transaction) throws ServletException, IOException {
-        if (transaction.getAccountId() == null || transaction.getAmount() == null) transaction.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
+        Integer accountId = getUriPathVariableAsInteger(request, "accountId");
+
+        if (accountId == null || transaction.getAmount() == null) transaction.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
         else {
             User user = getUserFromSession(request);
 
@@ -64,8 +62,11 @@ public class TransactionController extends JsonServletBase<Transaction> {
 
                 Account targetAccount = null;
                 for (Account account : user.getAccounts()) {
-                    if (account.getId() != null && account.getId().equals(transaction.getAccountId())) {
+                    LOG.info("AccountController.processGet(): Checking account: " + account.getName() + " to see if it's id = " + accountId);
+
+                    if (account.hashCode() == accountId) {
                         targetAccount = account;
+                        transaction.setAccount(account);
                         break;
                     }
                 }
@@ -75,8 +76,12 @@ public class TransactionController extends JsonServletBase<Transaction> {
                         || transaction.getAmount().doubleValue() <= 0.0) {
                     transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
                 } else {
-                    transaction = new TransactionDaoImpl().createTransaction(transaction);
-                    transaction.setStatus(SUCCESS_STATUS);
+                    try {
+                        transaction = new TransactionDaoImpl().createTransaction(transaction);
+                        transaction.setStatus(SUCCESS_STATUS);
+                    } catch (Exception e) {
+                        throw new ServletException(e);
+                    }
                 }
             } else {
                 LOG.log(Level.SEVERE, "AccountController.processGetAll(): user was unexpectedly null");
@@ -85,14 +90,4 @@ public class TransactionController extends JsonServletBase<Transaction> {
         }
         return transaction;
     }
-
-    @Override
-    protected Transaction processPut(HttpServletRequest request, HttpServletResponse response, Transaction putObject) throws ServletException, IOException {
-        return null;
-    }
-
-    @Override
-    protected void processDelete(HttpServletRequest request, HttpServletResponse response, Transaction deleteObject) throws ServletException, IOException {
-    }
-
 }

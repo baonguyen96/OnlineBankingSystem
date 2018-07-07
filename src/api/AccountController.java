@@ -18,9 +18,9 @@ import domain.Account;
 import domain.User;
 
 /**
- * Servlet implementation class Login
+ * Servlet API implementation class AccountController
  */
-@WebServlet("/api/account")
+@WebServlet("/api/users/{userId}/accounts/{accountId}")
 public class AccountController extends JsonServletBase<Account> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(AccountController.class.getName());
@@ -37,18 +37,20 @@ public class AccountController extends JsonServletBase<Account> {
     }
 
     @Override
-    protected Account processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
+    protected Account processGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         LOG.info("AccountController.processGet(): BEGIN");
+        Integer accountId = getUriPathVariableAsInteger(request, "accountId");
+
         Account retval = null;
         User user = getUserFromSession(request);
         if (user != null) {
-            LOG.info("AccountController.processGet(): Loaded User: " + user.getId());
+            LOG.info("AccountController.processGet(): Loaded User: " + user.getUsername());
             user = new AccountDaoImpl().loadAccounts(user);
 
             for (Account account : user.getAccounts()) {
-                LOG.info("AccountController.processGet(): Checking account: " + account.getId() + " to see if it's id: " + id);
+                LOG.info("AccountController.processGet(): Checking account: " + account.getName() + " to see if it's id = " + accountId);
 
-                if (account.getId() != null && account.getId().equals(id)) {
+                if (account.hashCode() == accountId) {
                     LOG.info("AccountController.processGet(): Account id matches, loading transactions");
                     retval = new TransactionDaoImpl().loadTransactions(account);
                     retval.setStatus(SUCCESS_STATUS);
@@ -92,14 +94,15 @@ public class AccountController extends JsonServletBase<Account> {
             if (account.getName() == null) account.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
             else {
                 account.setBalance(new BigDecimal(0));
-                account.setId(null);
-                account.setUserId(user.getId());
-                account = new AccountDaoImpl().createAccount(account);
+                account.setUser(user);
+                try {
+                    account = new AccountDaoImpl().createAccount(account);
+                } catch (Exception e) {
+                    throw new ServletException(e);
+                }
 
                 if (account != null) {
                     account.setStatus(SUCCESS_STATUS);
-                } else {
-                    account.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
                 }
             }
         }

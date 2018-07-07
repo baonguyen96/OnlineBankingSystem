@@ -2,9 +2,9 @@ package domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -12,19 +12,13 @@ import core.DbBaseObject;
 
 public class Account extends DbBaseObject {
 
-    @JsonProperty(access = Access.READ_ONLY)
-    private Long userId;
+    @JsonIgnore
+    private User user;
 
     private String name;
 
     @JsonProperty(access = Access.READ_ONLY)
     private BigDecimal balance;
-
-    @JsonProperty(access = Access.READ_ONLY)
-    private Date createdOn;
-
-    @JsonProperty(access = Access.READ_ONLY)
-    private Date updatedOn;
 
     @JsonProperty(access = Access.READ_ONLY)
     private List<Transaction> transactions = new ArrayList<Transaction>();
@@ -34,12 +28,12 @@ public class Account extends DbBaseObject {
      */
     private String status;
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getName() {
@@ -58,22 +52,6 @@ public class Account extends DbBaseObject {
         this.balance = balance;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
-    }
-
-    public Date getUpdatedOn() {
-        return updatedOn;
-    }
-
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
-    }
-
     public List<Transaction> getTransactions() {
         return transactions;
     }
@@ -90,9 +68,38 @@ public class Account extends DbBaseObject {
         this.status = status;
     }
 
+    @JsonProperty(access = Access.READ_ONLY)
+    public int getId() {
+        return hashCode();
+    }
+
     @Override
     public String toString() {
-        return "Account [userId=" + userId + ", name=" + name + ", balance=" + balance + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", transactions=" + transactions + ", status=" + status + "]";
+        return "Account [user=" + ((user != null) ? user.getUsername() : "") + ", name=" + name + ", balance=" + balance + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", transactions=" + transactions + ", status=" + status + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        Account other = (Account) obj;
+        if (name == null) {
+            if (other.name != null) return false;
+        } else if (!name.equals(other.name)) return false;
+        if (user == null) {
+            if (other.user != null) return false;
+        } else if (!user.equals(other.user)) return false;
+        return true;
     }
 
 }

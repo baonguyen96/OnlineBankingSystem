@@ -1,9 +1,12 @@
 package domain;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -20,7 +23,8 @@ public class User extends DbBaseObject {
 
     @JsonProperty(access = Access.WRITE_ONLY)
     private String recoverPasswordAnswer;
-    private List<Account> accounts;
+
+    private Map<Integer, Account> accounts;
 
     /**
      * Used for returning API call Status Information
@@ -67,12 +71,33 @@ public class User extends DbBaseObject {
         this.recoverPasswordAnswer = StringUtils.trimToNull(recoverPasswordAnswer);
     }
 
-    public List<Account> getAccounts() {
-        return accounts;
+    public void clearAccountsList() {
+        if (accounts == null) {
+            accounts = new LinkedHashMap<>();
+        } else {
+            accounts.clear();
+        }
     }
 
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
+    public Collection<Account> getAccounts() {
+        if (accounts == null) {
+            accounts = new LinkedHashMap<>();
+        }
+        return accounts.values();
+    }
+
+    public void setAccounts(Collection<Account> accounts2) throws Exception {
+        if (accounts2 == null) throw new Exception("cannot add a null collection of account");
+        if (accounts == null) accounts = new LinkedHashMap<>();
+        if (accounts2 != null) {
+            accounts2.forEach(account -> accounts.put(account.hashCode(), account));
+        }
+    }
+
+    public void addAccount(Account account) throws Exception {
+        if (account == null) throw new Exception("cannot add a null account to a user");
+        if (accounts == null) accounts = new LinkedHashMap<>();
+        this.accounts.put(account.hashCode(), account);
     }
 
     public String getStatus() {
@@ -85,7 +110,28 @@ public class User extends DbBaseObject {
 
     @Override
     public String toString() {
-        return "User [iD=" + id + ", username=" + username + ", password=" + password + ", name=" + name + ", recoverPasswordQuestion=" + recoverPasswordQuestion + ", recoverPasswordAnswer=" + recoverPasswordAnswer + ", status=" + status + "]";
+        return "User [username=" + username + ", password=" + password + ", name=" + name + ", recoverPasswordQuestion=" + recoverPasswordQuestion + ", recoverPasswordAnswer=" + recoverPasswordAnswer + ", status=" + status + "]";
+    }
+
+    @Override
+    @JsonGetter(value = "id")
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        User other = (User) obj;
+        if (username == null) {
+            if (other.username != null) return false;
+        } else if (!username.equals(other.username)) return false;
+        return true;
     }
 
 }

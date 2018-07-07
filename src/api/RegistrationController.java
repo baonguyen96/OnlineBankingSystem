@@ -34,11 +34,6 @@ public class RegistrationController extends JsonServletBase<User> {
     }
 
     @Override
-    protected User processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
-        return null;
-    }
-
-    @Override
     protected Collection<User> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         return null;
     }
