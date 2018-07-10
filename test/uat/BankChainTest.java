@@ -223,7 +223,6 @@ class BankChainTest {
 	    driver.findElement(By.id("loginPassword")).clear();
 	    driver.findElement(By.id("loginPassword")).sendKeys("password1");
 	    driver.findElement(By.id("loginSubmitButton")).click();
-	    driver.findElement(By.id("loginSubmitButton")).click();
 	    pause(2);
 	    assertEquals("Accounts Home",
 		    driver.findElement(By.xpath("//div[@id='accountsHomeScreen']/div/div[2]/h3")).getText());
