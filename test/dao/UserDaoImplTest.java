@@ -59,7 +59,7 @@ public class UserDaoImplTest {
 	Login noneExist = new Login();
 	noneExist.setUsername("noneExist");
 	noneExist.setPassword("noneExist");
-	UserDao userDao = new UserDaoImpl();
+	UserDaoImpl userDao = new UserDaoImpl();
 	User user = userDao.validateUser(noneExist);
 	assertNull(user);
     }
@@ -74,7 +74,7 @@ public class UserDaoImplTest {
 	rawUser.setPassword("passwordLogin");
 	rawUser.setRecoverPasswordQuestion("questionLogin");
 	rawUser.setRecoverPasswordAnswer("answerLogin");
-	UserDao userDao = new UserDaoImpl();
+	UserDaoImpl userDao = new UserDaoImpl();
 	userDao.register(rawUser);
 	
 	// verify login
@@ -98,7 +98,7 @@ public class UserDaoImplTest {
 	rawUser.setRecoverPasswordQuestion("questionRegister");
 	rawUser.setRecoverPasswordAnswer("answerRegister");
 
-	UserDao userDao = new UserDaoImpl();
+	UserDaoImpl userDao = new UserDaoImpl();
 	User registeredUser = userDao.register(rawUser);
 
 	assertEquals("FirstRegister LastRegister", registeredUser.getName());
