@@ -46,7 +46,6 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
         boolean successful = false;
         if (request != null //
                 && user != null //
-                && user.getId() != null //
                 && user.getUsername() != null //
                 && user.getName() != null) {
             HttpSession session = request.getSession();
@@ -75,6 +74,17 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
         return user;
     }
 
+    protected Integer getUriPathVariableAsInteger(HttpServletRequest request, String varName) {
+        Integer retval = null;
+        try {
+            Object varVal = request.getAttribute(varName);
+            if (varVal != null && varVal instanceof String) {
+                retval = Integer.parseInt((String) varVal);
+            }
+        } catch (NumberFormatException e) {}
+        return retval;
+    }
+
     /**
      * Removes any active session for the current user.
      * 
@@ -93,7 +103,9 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected abstract T processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException;
+    protected T processGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        return null;
+    }
 
     /**
      * Handles Retrieve All REST requests, returning the appropriate objects given the context
@@ -104,7 +116,9 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected abstract Collection<T> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
+    protected Collection<T> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        return null;
+    }
 
     /**
      * Handles the Create REST requests.
@@ -115,7 +129,9 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected abstract T processPost(HttpServletRequest request, HttpServletResponse response, T postObject) throws ServletException, IOException;
+    protected T processPost(HttpServletRequest request, HttpServletResponse response, T postObject) throws ServletException, IOException {
+        return null;
+    }
 
     /**
      * Handles the Update REST requests.
@@ -126,7 +142,9 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected abstract T processPut(HttpServletRequest request, HttpServletResponse response, T putObject) throws ServletException, IOException;
+    protected T processPut(HttpServletRequest request, HttpServletResponse response, T putObject) throws ServletException, IOException {
+        return null;
+    }
 
     /**
      * Handles the Delete REST requests.
@@ -137,7 +155,8 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected abstract void processDelete(HttpServletRequest request, HttpServletResponse response, T deleteObject) throws ServletException, IOException;
+    protected void processDelete(HttpServletRequest request, HttpServletResponse response, T deleteObject) throws ServletException, IOException {
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -154,16 +173,13 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
         }
 
         try {
-            String idString = request.getParameter("id");
             String returnJsonString = null;
 
-            LOG.info("id = " + idString);
-            if (idString == null) {
+            if (request.getAttribute(RestFilter.IS_COLLECTION) != null) {
                 Collection<T> objectToReturn = processGetAll(request, response);
                 returnJsonString = objectsToJson(objectToReturn);
             } else {
-                Long id = Long.parseLong(idString.trim());
-                T objectToReturn = processGet(request, response, id);
+                T objectToReturn = processGet(request, response);
                 returnJsonString = objectToJson(objectToReturn);
             }
 

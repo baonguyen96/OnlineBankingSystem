@@ -21,8 +21,12 @@ public class AccountDaoImpl {
 
     /**
      * Attempts to create a new Account, returns the Account if it succeeds or null if it fails
+     * @throws Exception 
      */
-    public Account createAccount(Account account) {
+    public Account createAccount(Account account) throws Exception {
+        if (account == null) throw new Exception("cannot create a null account");
+        if (account.getUser() == null) throw new Exception("cannot create an account with a null user");
+
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -30,25 +34,25 @@ public class AccountDaoImpl {
 
         try {
             conn = db.getConnection();
+
             ps = conn.prepareStatement("INSERT INTO account " //
                     + "(id, user_id, name, balance, created_on, updated_on) " //
                     + "value (?, ?, ?, ?, now(), now())");
 
             int i = 1; // sql param index
 
-            ps.setLong(i++, 0L); // auto-increment id
-            ps.setLong(i++, account.getUserId());
+            ps.setLong(i++, account.hashCode()); // auto-increment id
+            ps.setLong(i++, account.getUser().hashCode());
             ps.setString(i++, account.getName());
             ps.setBigDecimal(i++, new BigDecimal(0));
 
             status = ps.executeUpdate();
 
             if (status == 1) {
-                account.setId(DBUtils.getLastInsertId(conn));
-
-                LOG.log(Level.INFO, "Created new account for user id:" + account.getUserId() + "; account: " + account.toString());
+                account = getAccountById(conn, account.getUser(), account.hashCode());
+                LOG.log(Level.INFO, "Created new account for username:" + account.getUser().getUsername() + "; account: " + account.toString());
             } else {
-                LOG.log(Level.INFO, "Failed to create account for user " + account.getUserId());
+                LOG.log(Level.INFO, "Failed to create account for username " + account.getUser().getUsername());
                 account = null;
             }
         } catch (Exception e) {
@@ -65,7 +69,7 @@ public class AccountDaoImpl {
      * Loads the user's account information onto their User object
      */
     public User loadAccounts(User user) {
-        LOG.info("loading accounts for user: " + user.getId());
+        LOG.info("loading accounts for user: " + user.hashCode());
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -78,22 +82,21 @@ public class AccountDaoImpl {
                     + " FROM account" // 
                     + " WHERE user_id = ?" //
                     + " ORDER BY name ASC");
-            ps.setLong(1, user.getId());
+            ps.setLong(1, user.hashCode());
 
             rs = ps.executeQuery();
 
             List<Account> accounts = new ArrayList<Account>();
             while (rs.next()) {
                 Account account = new Account();
-                account.setId(rs.getLong("id"));
-                account.setUserId(rs.getLong("user_id"));
+                account.setUser(user);
                 account.setName(rs.getString("name"));
                 account.setBalance(rs.getBigDecimal("balance"));
                 account.setCreatedOn(rs.getDate("created_on"));
                 account.setUpdatedOn(rs.getDate("updated_on"));
                 accounts.add(account);
 
-                LOG.info("loaded account " + account.getId() + " + for user: " + user.getId());
+                LOG.info("loaded account " + account.hashCode() + " + for user: " + user.hashCode());
             }
             user.setAccounts(accounts);
 
@@ -105,8 +108,44 @@ public class AccountDaoImpl {
         return user;
     }
 
-    public void updateBalance(Long account_id) {
-        LOG.info("updating balance for account_id: " + account_id);
+    private Account getAccountById(Connection conn, User user, int accountId) {
+        LOG.info("loading account by id: " + accountId);
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Account account = null;
+
+        try {
+            conn = db.getConnection();
+            ps = conn.prepareStatement("SELECT " // 
+                    + " id, user_id, name, balance, created_on, updated_on" //
+                    + " FROM account" // 
+                    + " WHERE id = ?");
+            ps.setLong(1, accountId);
+
+            rs = ps.executeQuery();
+
+            if (rs.next() && user.hashCode() == rs.getInt("user_id")) {
+                account = new Account();
+                account.setUser(user);
+                account.setName(rs.getString("name"));
+                account.setBalance(rs.getBigDecimal("balance"));
+                account.setCreatedOn(rs.getDate("created_on"));
+                account.setUpdatedOn(rs.getDate("updated_on"));
+                user.addAccount(account);
+                LOG.info("loaded account: " + account.hashCode());
+            }
+
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error validating customer login", e);
+        } finally {
+            DBUtils.closeQuietly(rs, ps);
+        }
+        return account;
+    }
+
+    void updateBalance(Account account) {
+        LOG.info("updating balance for account_id: " + account);
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -121,9 +160,13 @@ public class AccountDaoImpl {
                     + " set account.balance = currBal.balance";
             System.out.println(sql);
             ps = conn.prepareStatement(sql);
-            ps.setLong(1, account_id);
+            ps.setLong(1, account.hashCode());
             ps.executeUpdate();
 
+            DBUtils.closeQuietly(ps);
+            Account tmpAccount = getAccountById(conn, account.getUser(), account.hashCode());
+            account.setBalance(tmpAccount.getBalance());
+            account.setUpdatedOn(tmpAccount.getUpdatedOn());
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error updating account balance", e);
         } finally {

@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS `cs6359`.`user` (
   `full_name` VARCHAR(100) NOT NULL,
   `recover_password_question` VARCHAR(300) NOT NULL,
   `recover_password_answer` VARCHAR(300) NOT NULL,
+  `created_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 );
 
@@ -38,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `cs6359`.`transaction` (
   `account_id` INT(10) NOT NULL,
   `type` VARCHAR(50) NOT NULL,	-- Deposit, Withdraw, Transfer - Add, Transfer - Receive 
   `amount` DECIMAL(65,2) NOT NULL,
-  `created_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_on` TIMESTAMP NOT NULL,
   `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   FOREIGN KEY (account_id) REFERENCES `account` (`id`)  

@@ -11,14 +11,8 @@ import core.DbBaseObject;
 public class Transaction extends DbBaseObject {
 
     protected TransactionType type;
-    protected Long accountId;
+    protected Account account;
     protected BigDecimal amount;
-
-    @JsonProperty(access = Access.READ_ONLY)
-    private Date createdOn;
-
-    @JsonProperty(access = Access.READ_ONLY)
-    private Date updatedOn;
 
     /**
      * Used for returning API call Status Information
@@ -33,12 +27,12 @@ public class Transaction extends DbBaseObject {
         this.type = type;
     }
 
-    public Long getAccountId() {
-        return accountId;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public BigDecimal getAmount() {
@@ -73,9 +67,40 @@ public class Transaction extends DbBaseObject {
         this.updatedOn = updatedOn;
     }
 
+    @JsonProperty(access = Access.READ_ONLY)
+    public int getId() {
+        return hashCode();
+    }
+
     @Override
     public String toString() {
-        return "Transaction [id=" + id + ", type=" + type + ", accountId=" + accountId + ", amount=" + amount + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", status=" + status + "]";
+        return "Transaction [type=" + type + ", account=" + ((account != null) ? account.getName() : "") + ", amount=" + amount + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", status=" + status + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((account == null) ? 0 : account.hashCode());
+        result = prime * result + ((createdOn == null) ? 0 : createdOn.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        Transaction other = (Transaction) obj;
+        if (account == null) {
+            if (other.account != null) return false;
+        } else if (!account.equals(other.account)) return false;
+        if (createdOn == null) {
+            if (other.createdOn != null) return false;
+        } else if (!createdOn.equals(other.createdOn)) return false;
+        if (type != other.type) return false;
+        return true;
     }
 
 }

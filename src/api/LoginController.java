@@ -1,7 +1,6 @@
 package api;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,7 +15,7 @@ import domain.Login;
 import domain.User;
 
 /**
- * Servlet implementation class Login
+ * Servlet API implementation class LoginController
  */
 @WebServlet("/api/login")
 public class LoginController extends JsonServletBase<Login> {
@@ -33,16 +32,6 @@ public class LoginController extends JsonServletBase<Login> {
         return false;
     }
 
-    @Override
-    protected Login processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
-        return null;
-    }
-
-    @Override
-    protected Collection<Login> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        return null;
-    }
-
     /**
      * Processes a User login request and if they successfully authenticate creates their session
      */
@@ -53,7 +42,7 @@ public class LoginController extends JsonServletBase<Login> {
         if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
             loginRequest.setStatus(INVALID_STATUS);
         } else {
-            User user = new UserDaoImpl().validateCustomer(loginRequest);
+            User user = new UserDaoImpl().validateUser(loginRequest);
             if (createNewUserSession(request, user)) {
                 loginRequest.setStatus(SUCCESS_STATUS);
             } else {
@@ -62,11 +51,6 @@ public class LoginController extends JsonServletBase<Login> {
         }
         loginRequest.setPassword(null); // because security
         return loginRequest;
-    }
-
-    @Override
-    protected Login processPut(HttpServletRequest request, HttpServletResponse response, Login putObject) throws ServletException, IOException {
-        return null;
     }
 
     /**

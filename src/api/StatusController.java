@@ -1,7 +1,6 @@
 package api;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,7 +12,7 @@ import domain.Status;
 import domain.User;
 
 /**
- * Servlet implementation class Login
+ * Servlet API implementation class StatusController
  */
 @WebServlet("/api/status")
 public class StatusController extends JsonServletBase<Status> {
@@ -28,35 +27,15 @@ public class StatusController extends JsonServletBase<Status> {
     }
 
     @Override
-    protected Status processGet(HttpServletRequest request, HttpServletResponse response, Long id) throws ServletException, IOException {
+    protected Status processGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Status status = null;
 
         User user = getUserFromSession(request);
         if (user != null) {
             status = new Status();
-            status.setUserName(user.getUsername());
+            status.setUsername(user.getUsername());
         }
 
         return status;
     }
-
-    @Override
-    protected Collection<Status> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        return null;
-    }
-
-    @Override
-    protected Status processPost(HttpServletRequest request, HttpServletResponse response, Status loginRequest) throws ServletException, IOException {
-        return null;
-    }
-
-    @Override
-    protected Status processPut(HttpServletRequest request, HttpServletResponse response, Status putObject) throws ServletException, IOException {
-        return null;
-    }
-
-    @Override
-    protected void processDelete(HttpServletRequest request, HttpServletResponse response, Status deleteObject) throws ServletException, IOException {
-    }
-
 }

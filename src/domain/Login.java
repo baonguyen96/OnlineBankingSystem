@@ -2,6 +2,8 @@ package domain;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 /**
  * 
  * @author mehra
@@ -54,4 +56,11 @@ public class Login {
         return "Login [username=" + username + ", password=" + password + ", status=" + status + "]";
     }
 
+    @JsonGetter(value = "id")
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        return result;
+    }
 }

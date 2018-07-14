@@ -1,5 +1,6 @@
 var baseServerUrl = "http://localhost:8080/OnlineBankingSystem";
 var loggedIn = false;
+var currentUserId = "";
 
 function resetAll() {
 	// set the menu options based on login status
@@ -7,6 +8,8 @@ function resetAll() {
 		$("[name='loggedOutMenu']").hide();
 		$("[name='loggedInMenu']").show();
 	} else {
+		console.log('resetAll(): not logged in')
+		currentUserId = "";
 		$("[name='loggedInMenu']").hide();
 		$("[name='loggedOutMenu']").show();
 	}
@@ -110,20 +113,21 @@ function isValidSSN(value) {
 
 function checkLoginStatus() {
 	$.ajax({
-		url: baseServerUrl + '/api/status?id=0',
+		url: baseServerUrl + '/api/status',
 		type: 'GET',
-		data: null, //JSON.stringify(paginatedRequest),
+		data: null,
 		dataType: 'json',
 		contentType: "application/json",
 		success:function(res){
 			console.log(JSON.stringify(res));
 
-			if (res && res.userName) {
+			if (res && res.username && res.id) {
 				console.log(res.status);
 				$("[name='loggedInMenu']").show();
 				$("[name='loggedOutMenu']").hide();
 				console.log(res);
 				loggedIn = true;
+				currentUserId = res.id;
 				loadAndShowAccounts();
 			} else {
 				loggedIn = false;	
@@ -180,13 +184,16 @@ function processLoginRequest() {
 		success:function(res){
 			console.log(JSON.stringify(res));
 			console.log(res.status);
-			if (res.status === "Success") {
+			if (res.status == "Success") {
+				console.log("Success");
+				loggedIn = true;
+				currentUserId = res.id;
 				$("#loginUsername").val("");
 				$("#loginPassword").val("");
-			
 				$("[name='loggedOutMenu']").hide();
 				$("[name='loggedInMenu']").show();
 				$("#loginAlert").hide();
+				resetAll();
 				loadAndShowAccounts();
 			} else {
 				$("[name='loggedInMenu']").hide();
@@ -273,8 +280,9 @@ function processRegistrationRequest() {
 }
 
 function loadAndShowAccounts() {
+	console.log('loadAndShowAccounts(): currentUserId=' + currentUserId);
 	$.ajax({
-		url: baseServerUrl + '/api/account',
+		url: baseServerUrl + '/api/users/' + currentUserId + '/accounts',
 		type: 'GET',
 		data: null, 
 		dataType: 'json',
@@ -341,7 +349,7 @@ function processCreateAccount() {
 	};
 
 	$.ajax({
-		url: baseServerUrl + '/api/account',
+		url: baseServerUrl + '/api/users/' + currentUserId + '/accounts',
 		type: 'POST',
 		data: JSON.stringify(accountRequest),
 		dataType: 'json',
@@ -379,13 +387,12 @@ function processDeposit() {
 	amount = $("#depositModalAmount").val();
 
 	transactionRequest = {
-		"accountId":accountId,
 		"type":"Deposit",
 		"amount":amount
 	};
 
 	$.ajax({
-		url: baseServerUrl + '/api/transaction',
+		url: baseServerUrl + '/api/users/' + currentUserId + '/accounts/' + accountId + '/transactions',
 		type: 'POST',
 		data: JSON.stringify(transactionRequest),
 		dataType: 'json',
@@ -415,7 +422,7 @@ function loadAndShowTransactions() {
 	console.log(accountId);
 
 	$.ajax({
-		url: baseServerUrl + '/api/account',
+		url: baseServerUrl + '/api/users/' + currentUserId + '/accounts/' + accountId,
 		type: 'GET',
 		data: { "id": accountId }, 
 		dataType: 'json',
