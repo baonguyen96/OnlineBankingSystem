@@ -11,6 +11,8 @@ import core.DbBaseObject;
 public class Transaction extends DbBaseObject {
 
     protected TransactionType type;
+
+    @JsonProperty(access = Access.WRITE_ONLY)
     protected Account account;
     protected BigDecimal amount;
 
