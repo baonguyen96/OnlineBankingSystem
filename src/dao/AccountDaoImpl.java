@@ -116,7 +116,7 @@ public class AccountDaoImpl implements AccountDao {
         return user;
     }
 
-    private Account getAccountById(Connection conn, User user, int accountHashCode) {
+    Account getAccountById(Connection conn, User user, int accountHashCode) {
         LOG.log(Logger.Action.BEGIN, "dbConnection", "user", "accountHashCode");
         LOG.info("loading account by id: " + accountHashCode);
 
