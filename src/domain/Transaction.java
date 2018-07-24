@@ -1,8 +1,8 @@
 package domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -16,6 +16,10 @@ public class Transaction extends DbBaseObject {
     protected Account account;
     protected BigDecimal amount;
 
+    @JsonProperty(access = Access.WRITE_ONLY)
+    protected Account transferFromAccount;
+    protected Account transferToAccount;
+
     /**
      * Used for returning API call Status Information
      */
@@ -27,6 +31,7 @@ public class Transaction extends DbBaseObject {
 
     public void setType(TransactionType type) {
         this.type = type;
+        if (TransactionType.TransferOut == type && getAccount() != null) setTransferFromAccount(getAccount());
     }
 
     public Account getAccount() {
@@ -35,6 +40,7 @@ public class Transaction extends DbBaseObject {
 
     public void setAccount(Account account) {
         this.account = account;
+        if (TransactionType.TransferOut == getType()) setTransferFromAccount(account);
     }
 
     public BigDecimal getAmount() {
@@ -53,25 +59,42 @@ public class Transaction extends DbBaseObject {
         this.status = status;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Account getTransferFromAccount() {
+        return transferFromAccount;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setTransferFromAccount(Account transferFromAccount) {
+        this.transferFromAccount = transferFromAccount;
     }
 
-    public Date getUpdatedOn() {
-        return updatedOn;
+    public Account getTransferToAccount() {
+        return transferToAccount;
     }
 
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
+    public void setTransferToAccount(Account transferToAccount) {
+        this.transferToAccount = transferToAccount;
     }
 
     @JsonProperty(access = Access.READ_ONLY)
     public int getId() {
         return hashCode();
+    }
+
+    @JsonIgnore
+    public boolean isValid() {
+        if (getAmount() == null) return false;
+        if (getType() == null) return false;
+        if (getAccount() == null) return false;
+
+        if (getAmount().doubleValue() == 0.0) {
+            return false;
+        } else if (getAmount().doubleValue() < 0.0) {
+            if (TransactionType.Withdraw == getType()) return true;
+            if (TransactionType.TransferOut == getType() && getTransferToAccount() != null) return true;
+        } else if (getAmount().doubleValue() > 0.0) {
+            if (TransactionType.Deposit == getType()) return true;
+        }
+        return false;
     }
 
     @Override

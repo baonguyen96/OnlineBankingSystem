@@ -6,16 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import core.DBUtils;
+import core.Logger;
 import db.DbManager;
 import domain.Account;
 import domain.User;
 
 public class AccountDaoImpl {
-    private static final Logger LOG = Logger.getLogger(AccountDaoImpl.class.getName());
+    private static final Logger LOG = new Logger(AccountDaoImpl.class);
 
     private DbManager db = new DbManager();
 
@@ -24,44 +23,48 @@ public class AccountDaoImpl {
      * @throws Exception 
      */
     public Account createAccount(Account account) throws Exception {
-        if (account == null) throw new Exception("cannot create a null account");
-        if (account.getUser() == null) throw new Exception("cannot create an account with a null user");
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        int status = 0;
-
+        LOG.log(Logger.Action.BEGIN, "account");
         try {
-            conn = db.getConnection();
+            if (account == null) throw new Exception("cannot create a null account");
+            if (account.getUser() == null) throw new Exception("cannot create an account with a null user");
 
-            ps = conn.prepareStatement("INSERT INTO account " //
-                    + "(id, user_id, name, balance, created_on, updated_on) " //
-                    + "value (?, ?, ?, ?, now(), now())");
+            Connection conn = null;
+            PreparedStatement ps = null;
 
-            int i = 1; // sql param index
+            int status = 0;
 
-            ps.setLong(i++, account.hashCode()); // auto-increment id
-            ps.setLong(i++, account.getUser().hashCode());
-            ps.setString(i++, account.getName());
-            ps.setBigDecimal(i++, new BigDecimal(0));
+            try {
+                conn = db.getConnection();
 
-            status = ps.executeUpdate();
+                ps = conn.prepareStatement("INSERT INTO account " //
+                        + "(id, user_id, name, balance, created_on, updated_on) " //
+                        + "value (?, ?, ?, ?, now(), now())");
 
-            if (status == 1) {
-                account = getAccountById(conn, account.getUser(), account.hashCode());
-                LOG.log(Level.INFO, "Created new account for username:" + account.getUser().getUsername() + "; account: " + account.toString());
-            } else {
-                LOG.log(Level.INFO, "Failed to create account for username " + account.getUser().getUsername());
+                int i = 1; // sql param index
+
+                ps.setLong(i++, account.hashCode()); // auto-increment id
+                ps.setLong(i++, account.getUser().hashCode());
+                ps.setString(i++, account.getName());
+                ps.setBigDecimal(i++, new BigDecimal(0));
+
+                status = ps.executeUpdate();
+
+                if (status == 1) {
+                    account = getAccountById(conn, account.getUser(), account.hashCode());
+                    LOG.info("Created new account for username:" + account.getUser().getUsername() + "; account: " + account.toString());
+                } else {
+                    LOG.warn("Failed to create account for username " + account.getUser().getUsername());
+                    account = null;
+                }
+            } catch (Exception e) {
                 account = null;
+                LOG.error("Error validating customer login", e);
+            } finally {
+                DBUtils.closeQuietly(ps, conn);
             }
-        } catch (Exception e) {
-            account = null;
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
         } finally {
-            DBUtils.closeQuietly(ps, conn);
+            LOG.log(Logger.Action.RETURN, "account");
         }
-
         return account;
     }
 
@@ -69,6 +72,8 @@ public class AccountDaoImpl {
      * Loads the user's account information onto their User object
      */
     public User loadAccounts(User user) {
+        LOG.log(Logger.Action.BEGIN, "user");
+
         LOG.info("loading accounts for user: " + user.hashCode());
 
         Connection conn = null;
@@ -101,15 +106,17 @@ public class AccountDaoImpl {
             user.setAccounts(accounts);
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
+            LOG.error("Error validating customer login", e);
         } finally {
             DBUtils.closeQuietly(rs, ps, conn);
         }
+        LOG.log(Logger.Action.RETURN, "userWithAccounts");
         return user;
     }
 
-    private Account getAccountById(Connection conn, User user, int accountId) {
-        LOG.info("loading account by id: " + accountId);
+    private Account getAccountById(Connection conn, User user, int accountHashCode) {
+        LOG.log(Logger.Action.BEGIN, "dbConnection", "user", "accountHashCode");
+        LOG.info("loading account by id: " + accountHashCode);
 
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -121,7 +128,7 @@ public class AccountDaoImpl {
                     + " id, user_id, name, balance, created_on, updated_on" //
                     + " FROM account" // 
                     + " WHERE id = ?");
-            ps.setLong(1, accountId);
+            ps.setLong(1, accountHashCode);
 
             rs = ps.executeQuery();
 
@@ -137,14 +144,17 @@ public class AccountDaoImpl {
             }
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
+            LOG.error("Error validating customer login", e);
         } finally {
             DBUtils.closeQuietly(rs, ps);
         }
+
+        LOG.log(Logger.Action.RETURN, "account");
         return account;
     }
 
     void updateBalance(Account account) {
+        LOG.log(Logger.Action.BEGIN, "account");
         LOG.info("updating balance for account_id: " + account);
 
         Connection conn = null;
@@ -168,9 +178,10 @@ public class AccountDaoImpl {
             account.setBalance(tmpAccount.getBalance());
             account.setUpdatedOn(tmpAccount.getUpdatedOn());
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error updating account balance", e);
+            LOG.error("Error updating account balance", e);
         } finally {
             DBUtils.closeQuietly(ps, conn);
         }
+        LOG.log(Logger.Action.RETURN);
     }
 }

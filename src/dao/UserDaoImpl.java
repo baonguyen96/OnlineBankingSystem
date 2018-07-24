@@ -3,17 +3,16 @@ package dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import core.DBUtils;
+import core.Logger;
 import core.Utilities;
 import db.DbManager;
 import domain.Login;
 import domain.User;
 
 public class UserDaoImpl {
-    private static final Logger LOG = Logger.getLogger(UserDaoImpl.class.getName());
+    private static final Logger LOG = new Logger(UserDaoImpl.class);
 
     private DbManager db = new DbManager();
 
@@ -21,6 +20,7 @@ public class UserDaoImpl {
      * Attempts to create a new User, returns the User if it succeeds or null if it fails
      */
     public User register(User user) {
+        LOG.log(Logger.Action.BEGIN, "user");
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -49,18 +49,19 @@ public class UserDaoImpl {
             if (status == 1) {
                 DBUtils.closeQuietly(ps);
                 user = loadUser(conn, user.getUsername(), null);
-                LOG.log(Level.INFO, "Registered user " + user.getUsername() + " with id " + user.hashCode());
+                LOG.info("Registered user " + user.getUsername() + " with id " + user.hashCode());
             } else {
-                LOG.log(Level.INFO, "Failed to register user " + user.getUsername());
+                LOG.warn("Failed to register user " + user.getUsername());
                 user = null;
             }
         } catch (Exception e) {
             user = null;
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
+            LOG.error("Error validating customer login", e);
         } finally {
             DBUtils.closeQuietly(ps, conn);
         }
 
+        LOG.log(Logger.Action.RETURN, "user");
         return user;
     }
 
@@ -68,6 +69,7 @@ public class UserDaoImpl {
      * Validates the Login and returns the User if it succeeds or null on failure.
      */
     public User validateUser(Login login) {
+        LOG.log(Logger.Action.BEGIN, "login");
         Connection conn = null;
         User user = null;
 
@@ -76,15 +78,17 @@ public class UserDaoImpl {
                 conn = db.getConnection();
                 user = loadUser(conn, login.getUsername(), login.getPassword());
             } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Error validating customer login", e);
+                LOG.error("Error validating customer login", e);
             } finally {
                 DBUtils.closeQuietly(conn);
             }
         }
+        LOG.log(Logger.Action.RETURN, "user");
         return user;
     }
 
     private User loadUser(Connection conn, String username, String password) {
+        LOG.log(Logger.Action.BEGIN, "dbConnection", "username", "password");
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -115,10 +119,11 @@ public class UserDaoImpl {
                 // user.setRecoverPasswordAnswer(rs.getString("recover_password_answer"));
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
+            LOG.error("Error validating customer login", e);
         } finally {
             DBUtils.closeQuietly(rs, ps);
         }
+        LOG.log(Logger.Action.RETURN, "user");
         return user;
     }
 }

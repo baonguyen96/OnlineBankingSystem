@@ -7,17 +7,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import core.DBUtils;
+import core.Logger;
 import db.DbManager;
 import domain.Account;
 import domain.Transaction;
 import domain.TransactionType;
 
 public class TransactionDaoImpl {
-    private static final Logger LOG = Logger.getLogger(AccountDaoImpl.class.getName());
+    private static final Logger LOG = new Logger(TransactionDaoImpl.class);
 
     private DbManager db = new DbManager();
 
@@ -26,46 +25,50 @@ public class TransactionDaoImpl {
      * @throws Exception 
      */
     public Transaction createTransaction(Transaction transaction) throws Exception {
-        if (transaction == null) throw new Exception("cannot create a null transaction");
-        if (transaction.getAccount() == null) throw new Exception("cannot create a transaction on a null account");
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        int status = 0;
-
+        LOG.log(Logger.Action.BEGIN, "transaction");
         try {
-            conn = db.getConnection();
-            ps = conn.prepareStatement("INSERT INTO transaction " //
-                    + "(id, account_id, type, amount, created_on, updated_on) " //
-                    + "value (?, ?, ?, ?, ?, now())");
+            if (transaction == null) throw new Exception("cannot create a null transaction");
+            if (transaction.getAccount() == null) throw new Exception("cannot create a transaction on a null account");
 
-            int i = 1; // sql param index
+            Connection conn = null;
+            PreparedStatement ps = null;
 
-            transaction.setCreatedOn(new Date());
+            int status = 0;
 
-            ps.setLong(i++, transaction.hashCode()); // auto-increment id
-            ps.setLong(i++, transaction.getAccount().hashCode());
-            ps.setString(i++, transaction.getType().toString());
-            ps.setBigDecimal(i++, transaction.getAmount());
-            ps.setTimestamp(i++, new Timestamp(transaction.getCreatedOn().getTime()));
+            try {
+                conn = db.getConnection();
+                ps = conn.prepareStatement("INSERT INTO transaction " //
+                        + "(id, account_id, type, amount, created_on, updated_on) " //
+                        + "value (?, ?, ?, ?, ?, now())");
 
-            status = ps.executeUpdate();
+                int i = 1; // sql param index
 
-            if (status == 1) {
-                LOG.log(Level.INFO, "Created new transaction for account id:" + transaction.getAccount().hashCode() + "; account: " + transaction.toString());
-                new AccountDaoImpl().updateBalance(transaction.getAccount());
-            } else {
-                LOG.log(Level.INFO, "Failed to create transaction for account " + transaction.getAccount().hashCode());
+                transaction.setCreatedOn(new Date());
+
+                ps.setLong(i++, transaction.hashCode()); // auto-increment id
+                ps.setLong(i++, transaction.getAccount().hashCode());
+                ps.setString(i++, transaction.getType().toString());
+                ps.setBigDecimal(i++, transaction.getAmount());
+                ps.setTimestamp(i++, new Timestamp(transaction.getCreatedOn().getTime()));
+
+                status = ps.executeUpdate();
+
+                if (status == 1) {
+                    LOG.info("Created new transaction for account id:" + transaction.getAccount().hashCode() + "; account: " + transaction.toString());
+                    new AccountDaoImpl().updateBalance(transaction.getAccount());
+                } else {
+                    LOG.warn("Failed to create transaction for account " + transaction.getAccount().hashCode());
+                    transaction = null;
+                }
+            } catch (Exception e) {
                 transaction = null;
+                LOG.error("Error validating customer login", e);
+            } finally {
+                DBUtils.closeQuietly(ps, conn);
             }
-        } catch (Exception e) {
-            transaction = null;
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
         } finally {
-            DBUtils.closeQuietly(ps, conn);
+            LOG.log(Logger.Action.RETURN, "transaction");
         }
-
         return transaction;
     }
 
@@ -73,6 +76,7 @@ public class TransactionDaoImpl {
      * Loads the user's account information onto their User object
      */
     public Account loadTransactions(Account account) {
+        LOG.log(Logger.Action.BEGIN, "account");
         LOG.info("loading accounts for user: " + account.getId());
 
         Connection conn = null;
@@ -105,10 +109,11 @@ public class TransactionDaoImpl {
             account.setTransactions(transactions);
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error validating customer login", e);
+            LOG.error("Error validating customer login", e);
         } finally {
             DBUtils.closeQuietly(rs, ps, conn);
         }
+        LOG.log(Logger.Action.RETURN, "account");
         return account;
     }
 

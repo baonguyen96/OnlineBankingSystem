@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DBUtils {
+    private static final Logger LOG = new Logger(DBUtils.class);
 
     /**
      * Selects the max id from the specified table

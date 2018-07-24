@@ -1,15 +1,11 @@
 package api;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import core.JsonServletBase;
+import core.Logger;
 import dao.UserDaoImpl;
 import domain.Login;
 import domain.User;
@@ -20,15 +16,14 @@ import domain.User;
 @WebServlet("/api/login")
 public class LoginController extends JsonServletBase<Login> {
     private static final long serialVersionUID = 1L;
-    private static final Logger LOG = Logger.getLogger(LoginController.class.getName());
+    private static final Logger LOG = new Logger(LoginController.class);
     private static final String SUCCESS_STATUS = "Success";
     private static final String INVALID_STATUS = "Unknown Username or Password";
 
-    public LoginController() {
-    }
-
     @Override
     protected boolean requireValidSession() {
+        LOG.log(Logger.Action.BEGIN);
+        LOG.log(Logger.Action.RETURN, "is valid session required");
         return false;
     }
 
@@ -36,8 +31,9 @@ public class LoginController extends JsonServletBase<Login> {
      * Processes a User login request and if they successfully authenticate creates their session
      */
     @Override
-    protected Login processPost(HttpServletRequest request, HttpServletResponse response, Login loginRequest) throws ServletException, IOException {
-        LOG.log(Level.INFO, loginRequest.toString());
+    protected Login processPost(HttpServletRequest request, HttpServletResponse response, Login loginRequest) {
+        LOG.setScenarioName("User Login");
+        LOG.log(Logger.Action.BEGIN, "request", "response", "login request");
 
         if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
             loginRequest.setStatus(INVALID_STATUS);
@@ -50,6 +46,8 @@ public class LoginController extends JsonServletBase<Login> {
             }
         }
         loginRequest.setPassword(null); // because security
+
+        LOG.log(Logger.Action.RETURN, "login status");
         return loginRequest;
     }
 
@@ -57,9 +55,12 @@ public class LoginController extends JsonServletBase<Login> {
      * Processes a User logout request.  For security reasons, this always returns a 204 No-Content response code
      */
     @Override
-    protected void processDelete(HttpServletRequest request, HttpServletResponse response, Login deleteObject) throws ServletException, IOException {
+    protected void processDelete(HttpServletRequest request, HttpServletResponse response, Login deleteObject) {
+        LOG.setScenarioName("Logout");
+        LOG.log(Logger.Action.BEGIN, "request", "response", "logout request");
         removeUserSession(request);
         writeDeleteSuccessfulResponse(response);
+        LOG.log(Logger.Action.RETURN, "204 No-Content response");
     }
 
 }

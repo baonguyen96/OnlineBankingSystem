@@ -1,92 +1,82 @@
 package api;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import core.JsonServletBase;
+import core.Logger;
 import dao.AccountDaoImpl;
 import dao.TransactionDaoImpl;
 import domain.Account;
 import domain.Transaction;
-import domain.TransactionType;
 import domain.User;
 
 /**
  * Servlet API implementation class TransactionController
  */
-@WebServlet("/api/users/{userId}/accounts/{accountId}/transactions/{transactionId}")
+@WebServlet({ // 
+        "/api/users/{userId}/accounts/{accountId}/transactions/{transactionId}", // 
+        "/api/users/{userId}/accounts/{accountId}/{transferToAccountId}/transactions/{transactionId}" //
+})
 public class TransactionController extends JsonServletBase<Transaction> {
     private static final long serialVersionUID = 1L;
-    private static final Logger LOG = Logger.getLogger(TransactionController.class.getName());
+    private static final Logger LOG = new Logger(TransactionController.class);
+
     private static final String SUCCESS_STATUS = "Success";
     private static final String TRANSACTION_CREATION_FAILED_STATUS = "The transaction failed";
     private static final String REQUIRED_FIELDS_MISSING_STATUS = "Required fields are missing";
 
-    public TransactionController() {
-        super();
-    }
-
     @Override
     protected boolean requireValidSession() {
+        LOG.log(Logger.Action.BEGIN);
+        LOG.log(Logger.Action.RETURN, "is valid session required");
         return true;
-    }
-
-    /**
-     * Use AccountController GET to load an account with Transactions
-     */
-    @Override
-    protected Collection<Transaction> processGetAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        return null;
     }
 
     /**
      * Provides the CREATE Transaction action 
      */
     @Override
-    protected Transaction processPost(HttpServletRequest request, HttpServletResponse response, Transaction transaction) throws ServletException, IOException {
-        Integer accountId = getUriPathVariableAsInteger(request, "accountId");
+    protected Transaction processPost(HttpServletRequest request, HttpServletResponse response, Transaction transaction) throws ServletException {
+        LOG.setScenarioName("Process Transaction");
+        LOG.log(Logger.Action.BEGIN, "request", "response", "transaction");
 
-        if (accountId == null || transaction.getAmount() == null) transaction.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
-        else {
-            User user = getUserFromSession(request);
+        try {
+            Integer accountId = getUriPathVariableAsInteger(request, "accountId");
+            Integer transferToAccountId = getUriPathVariableAsInteger(request, "transferToAccountId");
 
-            if (user != null) {
-                user = new AccountDaoImpl().loadAccounts(user);
+            if (accountId == null || transaction.getAmount() == null) transaction.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
+            else {
+                User user = getUserFromSession(request);
 
-                Account targetAccount = null;
-                for (Account account : user.getAccounts()) {
-                    LOG.info("AccountController.processGet(): Checking account: " + account.getName() + " to see if it's id = " + accountId);
+                if (user != null) {
+                    user = new AccountDaoImpl().loadAccounts(user);
 
-                    if (account.hashCode() == accountId) {
-                        targetAccount = account;
-                        transaction.setAccount(account);
-                        break;
+                    Account targetAccount = user.getAccountByHashCode(accountId);
+                    Account transferToAccount = user.getAccountByHashCode(transferToAccountId);
+
+                    transaction.setAccount(targetAccount);
+                    transaction.setTransferToAccount(transferToAccount);
+
+                    if (targetAccount == null || !transaction.isValid()) {
+                        transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
+                    } else {
+                        try {
+                            transaction = new TransactionDaoImpl().createTransaction(transaction);
+                            transaction.setStatus(SUCCESS_STATUS);
+                        } catch (Exception e) {
+                            throw new ServletException(e);
+                        }
                     }
-                }
-
-                if (targetAccount == null //
-                        || !TransactionType.Deposit.equals(transaction.getType()) //
-                        || transaction.getAmount().doubleValue() <= 0.0) {
-                    transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
                 } else {
-                    try {
-                        transaction = new TransactionDaoImpl().createTransaction(transaction);
-                        transaction.setStatus(SUCCESS_STATUS);
-                    } catch (Exception e) {
-                        throw new ServletException(e);
-                    }
+                    LOG.error("AccountController.processGetAll(): user was unexpectedly null");
+                    transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
                 }
-            } else {
-                LOG.log(Level.SEVERE, "AccountController.processGetAll(): user was unexpectedly null");
-                transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
             }
+        } finally {
+            LOG.log(Logger.Action.RETURN, "transaction");
         }
         return transaction;
     }

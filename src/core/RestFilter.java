@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 
 @WebFilter("/RestFilter")
 public class RestFilter implements Filter {
+    private static final Logger LOG = new Logger(RestFilter.class);
+
     public static final String IS_COLLECTION = "RestFilter.IS_COLLECTION";
 
     static Map<String, String> regExToPath = null;
@@ -131,13 +133,13 @@ public class RestFilter implements Filter {
 
     @Override
     public void destroy() {
-	// TODO Auto-generated method stub
-	
+        // TODO Auto-generated method stub
+
     }
 
     @Override
     public void init(FilterConfig arg0) throws ServletException {
-	// TODO Auto-generated method stub
-	
+        // TODO Auto-generated method stub
+
     }
 }

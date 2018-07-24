@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,7 +20,8 @@ import domain.User;
 
 public abstract class JsonServletBase<T extends Object> extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private static final Logger LOG = Logger.getLogger(JsonServletBase.class.getName());
+    private static final Logger LOG = new Logger(JsonServletBase.class);
+
     private static final int SESSION_INACTIVE_TIMEOUT = 5 * 60; // 5 minutes * 60 seconds
     private final Class<T> type;
 
@@ -32,6 +31,8 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
     }
 
     protected boolean requireValidSession() {
+        LOG.log(Logger.Action.BEGIN);
+        LOG.log(Logger.Action.RETURN, "is valid session required");
         return true;
     }
 
@@ -43,6 +44,8 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @return true if the user session was created successfully, otherwise false
      */
     protected boolean createNewUserSession(HttpServletRequest request, User user) {
+        LOG.log(Logger.Action.BEGIN, "request", "user");
+
         boolean successful = false;
         if (request != null //
                 && user != null //
@@ -54,34 +57,44 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
             successful = true;
             LOG.info("Created new User Session for " + user.getUsername() + "; Session ID: " + session.getId());
         }
+        LOG.log(Logger.Action.RETURN, "user session created");
         return successful;
     }
 
     protected User getUserFromSession(HttpServletRequest request) {
+        LOG.log(Logger.Action.BEGIN, "request");
+
         User user = null;
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object sessUser = session.getAttribute(SessionConstants.USER);
             if (sessUser != null && sessUser instanceof User) {
                 user = (User) sessUser;
-                LOG.info("getUserFromSession(): " + user.toString());
+                LOG.info(user.toString());
             } else {
-                LOG.log(Level.SEVERE, "There's an active session (" + session.getId() + "), but no valid User object in it");
+                LOG.error("There's an active session (" + session.getId() + "), but no valid User object in it");
             }
         } else {
-            LOG.info("getUserFromSession(): No active session, returning null");
+            LOG.info("No active session, returning null");
         }
+
+        LOG.log(Logger.Action.RETURN, "logged in user");
         return user;
     }
 
     protected Integer getUriPathVariableAsInteger(HttpServletRequest request, String varName) {
+        LOG.log(Logger.Action.BEGIN, "request", "varName");
         Integer retval = null;
         try {
             Object varVal = request.getAttribute(varName);
             if (varVal != null && varVal instanceof String) {
                 retval = Integer.parseInt((String) varVal);
             }
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException e) {
+            // silently ignore
+        } finally {
+            LOG.log(Logger.Action.RETURN, "requested variable");
+        }
         return retval;
     }
 
@@ -91,8 +104,10 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @param request The current non-null HttpServletRequest associated with the user's request
      */
     protected void removeUserSession(HttpServletRequest request) {
+        LOG.log(Logger.Action.BEGIN, "request");
         HttpSession session = request.getSession(false);
         if (session != null) session.invalidate();
+        LOG.log(Logger.Action.RETURN);
     }
 
     /**
@@ -160,141 +175,124 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOG.log(Level.INFO, "doGet(): BEGIN; Path: " + request.getServletPath());
+        LOG.log(Logger.Action.BEGIN, "request", "response");
+        LOG.info("Path: " + request.getServletPath());
 
         HttpSession session = request.getSession(false);
-        User user = getUserFromSession(request);
-        LOG.info("doGet(): Session ID: " + ((session != null) ? session.getId() : "null") + "; User: " + ((user != null) ? user.getUsername() : "null"));
 
-        if (requireValidSession() && session == null) {
-            writeNotAuthorizedErrorResponse(response);
-            LOG.log(Level.INFO, "doPost(): END; NOT_AUTHORIZED");
-            return;
-        }
+        String returnDesc = "";
+        String returnJsonString = null;
 
         try {
-            String returnJsonString = null;
-
-            if (request.getAttribute(RestFilter.IS_COLLECTION) != null) {
-                Collection<T> objectToReturn = processGetAll(request, response);
-                returnJsonString = objectsToJson(objectToReturn);
+            if (requireValidSession() && session == null) {
+                returnDesc = writeNotAuthorizedErrorResponse(response);
             } else {
-                T objectToReturn = processGet(request, response);
-                returnJsonString = objectToJson(objectToReturn);
+                if (request.getAttribute(RestFilter.IS_COLLECTION) != null) {
+                    Collection<T> objectToReturn = processGetAll(request, response);
+                    returnDesc = LOG.getLastReturnedValueNames();
+                    returnJsonString = objectsToJson(objectToReturn);
+                } else {
+                    T objectToReturn = processGet(request, response);
+                    returnDesc = LOG.getLastReturnedValueNames();
+                    returnJsonString = objectToJson(objectToReturn);
+                }
+                writeJsonResponse(response, returnJsonString);
             }
-
-            LOG.log(Level.INFO, "doGet(): END; " + returnJsonString);
-            writeJsonResponse(response, returnJsonString);
-        } catch (NumberFormatException e) {
-            LOG.log(Level.SEVERE, "doGet(): " + e.getMessage());
-            writeClientErrorResponse(response);
-            return;
         } catch (ServletException | IOException e) {
-            LOG.log(Level.SEVERE, "doGet(): " + e.getMessage());
-            writeServerErrorResponse(response);
+            returnDesc = writeServerErrorResponse(response, e);
             return;
+        } finally {
+            LOG.log(Logger.Action.RETURN, returnDesc);
+            LOG.logSequenceCalls();
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOG.log(Level.INFO, "doPost(): BEGIN");
+        LOG.log(Logger.Action.BEGIN, "request", "response");
+        LOG.info("Path: " + request.getServletPath());
 
-        HttpSession session = request.getSession(false);
-        if (requireValidSession() && session == null) {
-            writeNotAuthorizedErrorResponse(response);
-            LOG.log(Level.INFO, "doPost(): END; NOT_AUTHORIZED");
-            return;
-        }
-
-        T inputObject = null;
-        try {
-            String requestInputString = readRequestAsString(request);
-            LOG.log(Level.INFO, "doPost(): INPUT; " + requestInputString);
-            inputObject = jsonToObject(requestInputString);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "doGet(): " + e.getMessage());
-            writeClientErrorResponse(response);
-            return;
-        }
+        String returnDesc = "";
 
         try {
-            T objectToReturn = processPost(request, response, inputObject);
-            String returnJsonString = objectToJson(objectToReturn);
-
-            LOG.log(Level.INFO, "doPost(): END; " + returnJsonString);
-            writeJsonResponse(response, returnJsonString);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "doGet(): " + e.getMessage());
-            writeServerErrorResponse(response);
-            return;
+            if (requireValidSession() && request.getSession(false) == null) {
+                returnDesc = writeNotAuthorizedErrorResponse(response);
+            } else {
+                try {
+                    T inputObject = jsonToObject(readRequestAsString(request));
+                    try {
+                        T objectToReturn = processPost(request, response, inputObject);
+                        returnDesc = LOG.getLastReturnedValueNames();
+                        writeJsonResponse(response, objectToJson(objectToReturn));
+                    } catch (Exception e) {
+                        returnDesc = writeServerErrorResponse(response, e);
+                    }
+                } catch (Exception e) {
+                    returnDesc = writeClientErrorResponse(response, e);
+                }
+            }
+        } finally {
+            LOG.log(Logger.Action.RETURN, returnDesc);
+            LOG.logSequenceCalls();
         }
     }
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOG.log(Level.INFO, "doPost(): BEGIN");
+        LOG.log(Logger.Action.BEGIN, "request", "response");
+        LOG.info("Path: " + request.getServletPath());
 
-        HttpSession session = request.getSession(false);
-        if (requireValidSession() && session == null) {
-            writeNotAuthorizedErrorResponse(response);
-            LOG.log(Level.INFO, "doPost(): END; NOT_AUTHORIZED");
-            return;
-        }
-
-        T inputObject = null;
-        try {
-            String requestInputString = readRequestAsString(request);
-            LOG.log(Level.INFO, "doPost(): INPUT; " + requestInputString);
-            inputObject = jsonToObject(requestInputString);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "doGet(): " + e.getMessage());
-            writeClientErrorResponse(response);
-            return;
-        }
+        String returnDesc = "";
 
         try {
-            T objectToReturn = processPut(request, response, inputObject);
-            String returnJsonString = objectToJson(objectToReturn);
-
-            LOG.log(Level.INFO, "doPost(): END; " + returnJsonString);
-            writeJsonResponse(response, returnJsonString);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "doGet(): " + e.getMessage());
-            writeServerErrorResponse(response);
-            return;
+            if (requireValidSession() && request.getSession(false) == null) {
+                returnDesc = writeNotAuthorizedErrorResponse(response);
+            } else {
+                try {
+                    T inputObject = jsonToObject(readRequestAsString(request));
+                    try {
+                        T objectToReturn = processPut(request, response, inputObject);
+                        returnDesc = LOG.getLastReturnedValueNames();
+                        writeJsonResponse(response, objectToJson(objectToReturn));
+                    } catch (Exception e) {
+                        returnDesc = writeServerErrorResponse(response, e);
+                    }
+                } catch (Exception e) {
+                    returnDesc = writeClientErrorResponse(response, e);
+                }
+            }
+        } finally {
+            LOG.log(Logger.Action.RETURN, returnDesc);
+            LOG.logSequenceCalls();
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LOG.log(Level.INFO, "doDelete(): BEGIN");
+        LOG.log(Logger.Action.BEGIN, "request", "response");
+        LOG.info("Path: " + request.getServletPath());
 
-        HttpSession session = request.getSession(false);
-        if (requireValidSession() && session == null) {
-            writeNotAuthorizedErrorResponse(response);
-            LOG.log(Level.INFO, "doPost(): END; NOT_AUTHORIZED");
-            return;
-        }
-
-        T inputObject = null;
-        try {
-            String requestInputString = readRequestAsString(request);
-            LOG.log(Level.INFO, "doDelete(): INPUT; " + requestInputString);
-            inputObject = jsonToObject(requestInputString);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "doDelete(): " + e.getMessage());
-            writeClientErrorResponse(response);
-            return;
-        }
+        String returnDesc = "";
 
         try {
-            processDelete(request, response, inputObject);
-            LOG.log(Level.INFO, "doDelete(): END");
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "doDelete(): " + e.getMessage());
-            writeServerErrorResponse(response);
-            return;
+            if (requireValidSession() && request.getSession(false) == null) {
+                returnDesc = writeNotAuthorizedErrorResponse(response);
+            } else {
+                try {
+                    T inputObject = jsonToObject(readRequestAsString(request));
+                    try {
+                        processDelete(request, response, inputObject);
+                        returnDesc = LOG.getLastReturnedValueNames();
+                    } catch (Exception e) {
+                        returnDesc = writeServerErrorResponse(response, e);
+                    }
+                } catch (Exception e) {
+                    returnDesc = writeClientErrorResponse(response, e);
+                }
+            }
+        } finally {
+            LOG.log(Logger.Action.RETURN, returnDesc);
+            LOG.logSequenceCalls();
         }
     }
 
@@ -304,11 +302,16 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
      * @param response The current non-null HttpServletResponse associated with the user's request
      */
     protected void writeDeleteSuccessfulResponse(HttpServletResponse response) {
+        LOG.log(Logger.Action.BEGIN, "response");
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        LOG.log(Logger.Action.RETURN, "204 delete successful");
     }
 
-    private void writeClientErrorResponse(HttpServletResponse response) {
+    private String writeClientErrorResponse(HttpServletResponse response, Exception e) throws IOException {
+        LOG.log(Logger.Action.BEGIN, "response");
+        LOG.error(e);
+
         PrintWriter out;
         try {
             out = response.getWriter();
@@ -317,12 +320,16 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
             response.setCharacterEncoding("UTF-8");
             out.print("{ \"errorMessage\": \"Sorry, but there was something wrong with your request :(\"}");
             out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } finally {
+            LOG.log(Logger.Action.RETURN, "400 bad request");
         }
+        return "400 bad request";
     }
 
-    private void writeServerErrorResponse(HttpServletResponse response) {
+    private String writeServerErrorResponse(HttpServletResponse response, Exception e) throws IOException {
+        LOG.log(Logger.Action.BEGIN, "response");
+        LOG.error(e);
+
         PrintWriter out;
         try {
             out = response.getWriter();
@@ -331,12 +338,14 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
             response.setCharacterEncoding("UTF-8");
             out.print("{ \"errorMessage\": \"Sorry, but someting broke.  Please try again later :(\"}");
             out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } finally {
+            LOG.log(Logger.Action.RETURN, "500 internal error");
         }
+        return "500 internal error";
     }
 
-    private void writeNotAuthorizedErrorResponse(HttpServletResponse response) {
+    private String writeNotAuthorizedErrorResponse(HttpServletResponse response) throws IOException {
+        LOG.log(Logger.Action.BEGIN, "response");
         PrintWriter out;
         try {
             out = response.getWriter();
@@ -345,43 +354,82 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
             response.setCharacterEncoding("UTF-8");
             out.print("{ \"errorMessage\": \"I'm sorry Dave, but I cannot allow you to do that :(\"}");
             out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } finally {
+            LOG.log(Logger.Action.RETURN, "401 unauthorized");
         }
+        return "401 unauthorized";
     }
 
     private void writeJsonResponse(HttpServletResponse response, String returnJsonString) throws IOException {
-        PrintWriter out = response.getWriter();
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        out.print(returnJsonString);
-        out.flush();
+        LOG.log(Logger.Action.BEGIN, "response", "returnJsonString");
+        try {
+            PrintWriter out = response.getWriter();
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            out.print(returnJsonString);
+            out.flush();
+        } finally {
+            LOG.log(Logger.Action.RETURN);
+        }
     }
 
     private String readRequestAsString(HttpServletRequest request) throws IOException {
-        StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = request.getReader();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            buffer.append(line);
+        LOG.log(Logger.Action.BEGIN, "request");
+        try {
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+            }
+            LOG.info("INPUT: " + buffer.toString());
+            return buffer.toString();
+        } finally {
+            LOG.log(Logger.Action.RETURN, "payload text");
         }
-        return buffer.toString();
     }
 
     private T jsonToObject(String json) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectReader objectReader = objectMapper.readerFor(type);
+        LOG.log(Logger.Action.BEGIN, "JSON");
+        LOG.info("json: " + json);
 
-        return objectReader.readValue(json);
+        T retval;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectReader objectReader = objectMapper.readerFor(type);
+            retval = objectReader.readValue(json);
+        } finally {
+            LOG.log(Logger.Action.RETURN, "java objects");
+        }
+        return retval;
     }
 
     private String objectToJson(T objectToConvert) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(objectToConvert);
+        LOG.log(Logger.Action.BEGIN, "objects to convert");
+
+        String returnJsonString;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            returnJsonString = objectMapper.writeValueAsString(objectToConvert);
+            LOG.info("returnJsonString: " + returnJsonString);
+        } finally {
+            LOG.log(Logger.Action.RETURN, "JSON");
+        }
+        return returnJsonString;
     }
 
     private String objectsToJson(Collection<T> objectsToConvert) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(objectsToConvert);
+        LOG.log(Logger.Action.BEGIN, "objects to convert");
+
+        String returnJsonString;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            returnJsonString = objectMapper.writeValueAsString(objectsToConvert);
+            LOG.info("returnJsonString: " + returnJsonString);
+        } finally {
+            LOG.log(Logger.Action.RETURN, "JSON");
+        }
+        return returnJsonString;
+
     }
 }
