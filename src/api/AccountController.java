@@ -10,7 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import core.JsonServletBase;
 import core.Logger;
+import dao.AccountDao;
 import dao.AccountDaoImpl;
+import dao.TransactionDao;
 import dao.TransactionDaoImpl;
 import domain.Account;
 import domain.User;
@@ -25,6 +27,27 @@ public class AccountController extends JsonServletBase<Account> {
     private static final String SUCCESS_STATUS = "Success";
     private static final String ACCOUNT_CREATION_FAILES_STATUS = "The account creation failed";
     private static final String REQUIRED_FIELDS_MISSING_STATUS = "Required fields are missing";
+
+    private AccountDao accountDao;
+    private TransactionDao transactionDao;
+
+    protected AccountDao getAccountDao() {
+        if (accountDao == null) accountDao = new AccountDaoImpl();
+        return accountDao;
+    }
+
+    void setAccountDao(AccountDao accountDao) {
+        this.accountDao = accountDao;
+    }
+
+    protected TransactionDao getTransactionDao() {
+        if (transactionDao == null) transactionDao = new TransactionDaoImpl();
+        return transactionDao;
+    }
+
+    void setTransactionDao(TransactionDao transactionDao) {
+        this.transactionDao = transactionDao;
+    }
 
     @Override
     protected boolean requireValidSession() {
@@ -43,14 +66,14 @@ public class AccountController extends JsonServletBase<Account> {
         User user = getUserFromSession(request);
         if (user != null) {
             LOG.info("AccountController.processGet(): Loaded User: " + user.getUsername());
-            user = new AccountDaoImpl().loadAccounts(user);
+            user = getAccountDao().loadAccounts(user);
 
             for (Account account : user.getAccounts()) {
-                LOG.info("AccountController.processGet(): Checking account: " + account.getName() + " to see if it's id = " + accountId);
+                LOG.info("AccountController.processGet(): Checking account: " + account.getName() + "(" + account.hashCode() + ") to see if it's hashCode == " + accountId);
 
                 if (account.hashCode() == accountId) {
                     LOG.info("AccountController.processGet(): Account id matches, loading transactions");
-                    retval = new TransactionDaoImpl().loadTransactions(account);
+                    retval = getTransactionDao().loadTransactions(account);
                     retval.setStatus(SUCCESS_STATUS);
                     break;
                 }
