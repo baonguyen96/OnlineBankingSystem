@@ -31,7 +31,13 @@ class BankChainTest {
 
 
     private void setupSelenium() {
-	System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver.exe");
+	if (System.getProperty("os.name").toLowerCase().startsWith("mac os x")) {
+            System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver");
+        } 
+	else {
+            System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver.exe");
+        }
+	
 	driver = new ChromeDriver();
 	baseUrl = "http://localhost:8080/OnlineBankingSystem/index.html";
 	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
