@@ -25,6 +25,8 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
     private static final int SESSION_INACTIVE_TIMEOUT = 5 * 60; // 5 minutes * 60 seconds
     private final Class<T> type;
 
+    public static final String NOT_AUTHORIZED_MESSAGE = "{ \"errorMessage\": \"I'm sorry Dave, but I cannot allow you to do that :(\"}";
+
     @SuppressWarnings("unchecked")
     public JsonServletBase() {
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
@@ -173,6 +175,8 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
     protected void processDelete(HttpServletRequest request, HttpServletResponse response, T deleteObject) throws ServletException, IOException {
     }
 
+    public Object lastResponseObject;
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         LOG.log(Logger.Action.BEGIN, "request", "response");
@@ -190,10 +194,12 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
                 if (request.getAttribute(RestFilter.IS_COLLECTION) != null) {
                     Collection<T> objectToReturn = processGetAll(request, response);
                     returnDesc = LOG.getLastReturnedValueNames();
+                    lastResponseObject = objectToReturn;
                     returnJsonString = objectsToJson(objectToReturn);
                 } else {
                     T objectToReturn = processGet(request, response);
                     returnDesc = LOG.getLastReturnedValueNames();
+                    lastResponseObject = objectToReturn;
                     returnJsonString = objectToJson(objectToReturn);
                 }
                 writeJsonResponse(response, returnJsonString);
@@ -352,7 +358,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            out.print("{ \"errorMessage\": \"I'm sorry Dave, but I cannot allow you to do that :(\"}");
+            out.print(NOT_AUTHORIZED_MESSAGE);
             out.flush();
         } finally {
             LOG.log(Logger.Action.RETURN, "401 unauthorized");
