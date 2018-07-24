@@ -67,9 +67,10 @@ class BankChainTest {
 	testCreateAccount();
 	testDepositNegativeAmountRejected();
 	testDepositPositiveAmountAccepted();
+	testViewTransaction();
 	testWithdrawNegativeAmountRejected();
-	testWithdrawPositiveAmountMoreThanBalanceRejected();	// not yet implemented in the code
-	testWithdrawPositiveAmountLessThanBalanceAccepted();	// not yet implemented in the code
+	testWithdrawPositiveAmountMoreThanBalanceRejected(); // not yet implemented in the code
+	testWithdrawPositiveAmountLessThanBalanceAccepted(); // not yet implemented in the code
 
 	quit();
     }
@@ -265,17 +266,17 @@ class BankChainTest {
 	    driver.findElement(By.id("createAccountName")).click();
 	    driver.findElement(By.id("createAccountName")).clear();
 	    driver.findElement(By.id("createAccountName")).sendKeys("Checking");
-	    
+
 	    // cancel
 	    driver.findElement(By.xpath("(//button[@type='button'])[10]")).click();
 	    pause(2);
-	    
+
 	    // acutally create account
 	    driver.findElement(By.id("createNewAccountButton")).click();
 	    pause(2);
 	    driver.findElement(By.id("createAccountSubmitButton")).click();
 	    pause(2);
-	    
+
 	    assertEquals("Checking", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div")).getText());
 	    assertEquals("0", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
 
@@ -285,7 +286,7 @@ class BankChainTest {
 		    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button")).getText());
 	    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button")).click();
 	    pause(2);
-	    
+
 	    assertEquals("Transactions for Checking", driver.findElement(By.id("transactionsModalTitle")).getText());
 	    driver.findElement(By.xpath("(//button[@type='button'])[15]")).click();
 
@@ -336,7 +337,7 @@ class BankChainTest {
 	    driver.findElement(By.id("depositSubmitButton")).click();
 	    pause(2);
 	    assertEquals("3", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
-	    
+
 	    log("Test Deposit Positive Amount Accepted: Pass");
 	}
 	catch (Throwable e) {
@@ -386,6 +387,44 @@ class BankChainTest {
 	}
 	catch (Throwable e) {
 	    log("Test Withdraw Positive Amount Less Than Balance Accepted: Fail");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+
+
+    /*
+     * driver.get("http://localhost:8080/OnlineBankingSystem/index.html");
+     * driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button"))
+     * .click(); try { assertEquals("7/23/2018, 7:00:00 PM",
+     * driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div")).
+     * getText()); } catch (Error e) { verificationErrors.append(e.toString()); }
+     * try { assertEquals("Deposit",
+     * driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div[2]")).
+     * getText()); } catch (Error e) { verificationErrors.append(e.toString()); }
+     * try { assertEquals("3",
+     * driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div[3]")).
+     * getText()); } catch (Error e) { verificationErrors.append(e.toString()); }
+     * driver.findElement(By.xpath("(//button[@type='button'])[15]")).click();
+     */
+
+    private void testViewTransaction() {
+	try {
+	    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button")).click();
+	    pause(2);
+	    // assertEquals("7/23/2018, 7:00:00 PM",
+	    // driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div")).getText());
+	    assertEquals("Deposit",
+		    driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div[2]")).getText());
+	    assertEquals("3", driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div[3]")).getText());
+	    driver.findElement(By.xpath("(//button[@type='button'])[15]")).click();
+
+	    log("Test View Transaction: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test View Transaction: Fail");
 	    logErrorMessage(e);
 	}
 	finally {
