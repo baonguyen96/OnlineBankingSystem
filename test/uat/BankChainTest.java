@@ -1,6 +1,7 @@
 package uat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -55,11 +56,20 @@ class BankChainTest {
 
 
     public void run() {
+	// basic signup
 	verifyHomePage();
 	testInvalidLogIn();
 	testInvalidRegister();
 	testValidRegister();
 	testValidLogin();
+
+	// account
+	testCreateAccount();
+	testDepositNegativeAmountRejected();
+	testDepositPositiveAmountAccepted();
+	testWithdrawNegativeAmountRejected();
+	testWithdrawPositiveAmountMoreThanBalanceRejected();
+	testWithdrawPositiveAmountLessThanBalanceAccepted();
 
 	quit();
     }
@@ -70,10 +80,13 @@ class BankChainTest {
 	    driver.get(baseUrl);
 	    pause(2);
 	    assertEquals("BankChain", driver.findElement(By.linkText("BankChain")).getText());
-//	    assertEquals("Home", driver.findElement(By.id("menuHome")).getText());
-//	    assertEquals("Services", driver.findElement(By.id("menuServices")).getText());
-//	    assertEquals("Products", driver.findElement(By.id("menuProducts")).getText());
-//	    assertEquals("Welcome to BankChain® Bank", driver.findElement(By.cssSelector("h1")).getText());
+	    // assertEquals("Home", driver.findElement(By.id("menuHome")).getText());
+	    // assertEquals("Services",
+	    // driver.findElement(By.id("menuServices")).getText());
+	    // assertEquals("Products",
+	    // driver.findElement(By.id("menuProducts")).getText());
+	    // assertEquals("Welcome to BankChain® Bank",
+	    // driver.findElement(By.cssSelector("h1")).getText());
 	    assertEquals("Sign-Up", driver.findElement(By.id("registerButton")).getText());
 	    assertEquals("Login", driver.findElement(By.xpath("(//button[@type='button'])[4]")).getText());
 
@@ -244,6 +257,122 @@ class BankChainTest {
     }
 
 
+    private void testCreateAccount() {
+	try {
+	    driver.get("http://localhost:8080/OnlineBankingSystem/index.html");
+	    driver.findElement(By.id("createNewAccountButton")).click();
+	    driver.findElement(By.id("createAccountName")).click();
+	    driver.findElement(By.id("createAccountName")).clear();
+	    driver.findElement(By.id("createAccountName")).sendKeys("Checking");
+	    driver.findElement(By.xpath("(//button[@type='button'])[10]")).click();
+	    driver.findElement(By.id("createNewAccountButton")).click();
+	    driver.findElement(By.id("createAccountSubmitButton")).click();
+
+	    assertEquals("Checking", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div")).getText());
+	    assertEquals("0", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
+
+	    assertEquals("Deposit",
+		    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[4]/button")).getText());
+	    assertEquals("View Transactions",
+		    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button")).getText());
+	    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button")).click();
+	    assertEquals("Post DateTypeAmount",
+		    driver.findElement(By.xpath("//div[@id='transactionsModal']/div/div/div[2]")).getText());
+	    assertEquals("Transactions for Checking", driver.findElement(By.id("transactionsModalTitle")).getText());
+	    driver.findElement(By.xpath("(//button[@type='button'])[15]")).click();
+
+	    log("Test Create Account: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test Create Account: Fail");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+
+    
+    private void testDepositNegativeAmountRejected() {
+	try {
+	    fail("Unimplemented");
+	    log("Test Deposit Negative Amount Accepted: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test Deposit Negative Amount Accepted: Pass");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+    
+    
+    
+    private void testDepositPositiveAmountAccepted() {
+	try {
+	    fail("Unimplemented");
+	    log("Test Deposit Positive Amount Accepted: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test Deposit Positive Amount Accepted: Fail");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+    
+    
+    private void testWithdrawNegativeAmountRejected() {
+	try {
+	    fail("Unimplemented");
+	    log("Test Deposit Negative Amount Rejected: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test Deposit Negative Amount Rejected: Fail");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+    
+    
+    
+    private void testWithdrawPositiveAmountMoreThanBalanceRejected() {
+	try {
+	    fail("Unimplemented");
+	    log("Test Withdraw Positive Amount More Than Balance Rejected: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test Withdraw Positive Amount More Than Balance Rejected: Fail");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+    
+    
+    
+    private void testWithdrawPositiveAmountLessThanBalanceAccepted() {
+	try {
+	    fail("Unimplemented");
+	    log("Test Withdraw Positive Amount Less Than Balance Accepted: Pass");
+	}
+	catch (Throwable e) {
+	    log("Test Withdraw Positive Amount Less Than Balance Accepted: Fail");
+	    logErrorMessage(e);
+	}
+	finally {
+	    pause(2);
+	}
+    }
+    
+    
+    
+
     private void templateMethod() {
 	try {
 	    log("Test Invalid Login: Pass");
@@ -262,11 +391,11 @@ class BankChainTest {
 	System.out.println(message);
     }
 
-    
+
     private void logErrorMessage(Throwable t) {
 	System.out.printf("> Error: %s\n", t.getStackTrace()[0]);
     }
-    
+
 
     private void pause(int seconds) {
 	try {
