@@ -15,7 +15,7 @@ import domain.Account;
 import domain.Transaction;
 import domain.TransactionType;
 
-public class TransactionDaoImpl {
+public class TransactionDaoImpl implements TransactionDao {
     private static final Logger LOG = new Logger(TransactionDaoImpl.class);
 
     private DbManager db = new DbManager();
@@ -24,6 +24,7 @@ public class TransactionDaoImpl {
      * Attempts to create a new Transaction, returns the Transaction if it succeeds or null if it fails
      * @throws Exception 
      */
+    @Override
     public Transaction createTransaction(Transaction transaction) throws Exception {
         LOG.log(Logger.Action.BEGIN, "transaction");
         try {
@@ -75,6 +76,7 @@ public class TransactionDaoImpl {
     /**
      * Loads the user's account information onto their User object
      */
+    @Override
     public Account loadTransactions(Account account) {
         LOG.log(Logger.Action.BEGIN, "account");
         LOG.info("loading accounts for user: " + account.getId());

@@ -13,7 +13,7 @@ import db.DbManager;
 import domain.Account;
 import domain.User;
 
-public class AccountDaoImpl {
+public class AccountDaoImpl implements AccountDao {
     private static final Logger LOG = new Logger(AccountDaoImpl.class);
 
     private DbManager db = new DbManager();
@@ -22,6 +22,7 @@ public class AccountDaoImpl {
      * Attempts to create a new Account, returns the Account if it succeeds or null if it fails
      * @throws Exception 
      */
+    @Override
     public Account createAccount(Account account) throws Exception {
         LOG.log(Logger.Action.BEGIN, "account");
         try {
@@ -71,6 +72,7 @@ public class AccountDaoImpl {
     /**
      * Loads the user's account information onto their User object
      */
+    @Override
     public User loadAccounts(User user) {
         LOG.log(Logger.Action.BEGIN, "user");
 
