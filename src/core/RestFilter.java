@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
@@ -129,17 +128,5 @@ public class RestFilter implements Filter {
                 System.err.println("\t\t\t\t\tRegEx already registered for " + regExToPath.get(regex));
             }
         }
-    }
-
-    @Override
-    public void destroy() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void init(FilterConfig arg0) throws ServletException {
-        // TODO Auto-generated method stub
-
     }
 }
