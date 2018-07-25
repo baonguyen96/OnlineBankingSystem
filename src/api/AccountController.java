@@ -25,7 +25,7 @@ public class AccountController extends JsonServletBase<Account> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = new Logger(AccountController.class);
     private static final String SUCCESS_STATUS = "Success";
-    private static final String ACCOUNT_CREATION_FAILES_STATUS = "The account creation failed";
+    private static final String ACCOUNT_CREATION_FAILED_STATUS = "The account creation failed";
     private static final String REQUIRED_FIELDS_MISSING_STATUS = "Required fields are missing";
 
     private AccountDao accountDao;
