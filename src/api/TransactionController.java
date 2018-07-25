@@ -11,6 +11,7 @@ import dao.AccountDaoImpl;
 import dao.TransactionDaoImpl;
 import domain.Account;
 import domain.Transaction;
+import domain.TransactionType;
 import domain.User;
 
 /**
@@ -58,9 +59,13 @@ public class TransactionController extends JsonServletBase<Transaction> {
                     Account transferToAccount = user.getAccountByHashCode(transferToAccountId);
 
                     transaction.setAccount(targetAccount);
-                    transaction.setTransferToAccount(transferToAccount);
+                    if (TransactionType.TransferOut == transaction.getType()) {
+                        transaction.setTransferFromAccount(targetAccount);
+                        transaction.setTransferToAccount(transferToAccount);
+                    }
 
                     if (targetAccount == null || !transaction.isValid()) {
+                        LOG.info("transaction was null or failed validation, " + (targetAccount == null) + ", " + (!transaction.isValid()));
                         transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
                     } else {
                         try {

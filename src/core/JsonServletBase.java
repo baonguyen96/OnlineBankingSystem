@@ -201,6 +201,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
                 writeJsonResponse(response, returnJsonString);
             }
         } catch (ServletException | IOException e) {
+            LOG.error(e);
             returnDesc = writeServerErrorResponse(response, e);
             return;
         } finally {
@@ -230,6 +231,7 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
                         returnDesc = writeServerErrorResponse(response, e);
                     }
                 } catch (Exception e) {
+                    LOG.error(e);
                     returnDesc = writeClientErrorResponse(response, e);
                 }
             }
@@ -257,9 +259,11 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
                         returnDesc = LOG.getLastReturnedValueNames();
                         writeJsonResponse(response, objectToJson(objectToReturn));
                     } catch (Exception e) {
+                        LOG.error(e);
                         returnDesc = writeServerErrorResponse(response, e);
                     }
                 } catch (Exception e) {
+                    LOG.error(e);
                     returnDesc = writeClientErrorResponse(response, e);
                 }
             }
@@ -286,9 +290,11 @@ public abstract class JsonServletBase<T extends Object> extends HttpServlet {
                         processDelete(request, response, inputObject);
                         returnDesc = LOG.getLastReturnedValueNames();
                     } catch (Exception e) {
+                        LOG.error(e);
                         returnDesc = writeServerErrorResponse(response, e);
                     }
                 } catch (Exception e) {
+                    LOG.error(e);
                     returnDesc = writeClientErrorResponse(response, e);
                 }
             }

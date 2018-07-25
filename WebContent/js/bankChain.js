@@ -85,6 +85,10 @@ $(document).ready(function() {
 	$("#depositSubmitButton").click(function() {
 		processDeposit();		
 	});
+
+	$("#withdrawSubmitButton").click(function() {
+		processWithdraw();		
+	});
 });
 
 function isValidSSN(value) {
@@ -304,8 +308,20 @@ function loadAndShowAccounts() {
 				$("<div class='col-md-2'>" + this.name + "</div>").appendTo(row);
 				$("<div class='col-md-2'>" + new Date(this.updatedOn).toLocaleString() + "</div>").appendTo(row);
 				$("<div class='col-md-1'>" + this.balance + "</div>").appendTo(row);
-				buttonDiv = $("<div class='col-md-1'></div>")
+				buttonDiv = $("<div class='col-md-2'></div>")
 				
+				var transactionsButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>View Transactions</button>")
+				$(transactionsButton).click(function() {
+					transactionsModalTitle = $("#transactionsModalTitle");
+					transactionsModalTitle.html("Transactions for " + $(this).attr('accountName'));
+					transactionsModalTitle.attr("accountId", $(this).attr('accountId'));
+					$("#transactionsModal").modal();
+					loadAndShowTransactions();
+				})
+				$(transactionsButton).appendTo(buttonDiv);
+				buttonDiv.appendTo(row);
+
+				buttonDiv = $("<div class='col-md-1'></div>")
 				var depositButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>Deposit</button>")
 				$(depositButton).click(function() {
 					depositModalTitle = $("#depositModalTitle");
@@ -316,18 +332,21 @@ function loadAndShowAccounts() {
 				$(depositButton).appendTo(buttonDiv);
 				buttonDiv.appendTo(row);
 
-				buttonDiv = $("<div class='col-md-1'></div>")
-				var transactionsButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>View Transactions</button>")
-				$(transactionsButton).click(function() {
-					transactionsModalTitle = $("#transactionsModalTitle");
-					transactionsModalTitle.html("Transactions for " + $(this).attr('accountName'));
-					transactionsModalTitle.attr("accountId", $(this).attr('accountId'));
-					$("#transactionsModal").modal();
-					loadAndShowTransactions();
-				})
-				$(transactionsButton).appendTo(buttonDiv);
-				
-				buttonDiv.appendTo(row);
+				console.log(this.balance + ' > 0 = ' + (parseFloat(this.balance) > 0));
+
+				if (parseFloat(this.balance) > 0) {
+					buttonDiv = $("<div class='col-md-1'></div>")
+					var withdrawButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>Withdraw</button>")
+					$(withdrawButton).click(function() {
+						withdrawModalTitle = $("#withdrawModalTitle");
+						withdrawModalTitle.html("Withdraw from " + $(this).attr('accountName'));
+						withdrawModalTitle.attr("accountId", $(this).attr('accountId'));
+						$("#withdrawModal").modal();
+					})
+					$(withdrawButton).appendTo(buttonDiv);
+					buttonDiv.appendTo(row);
+				}
+
 				$(row).appendTo(accountsList);
 			});
 		},
@@ -414,6 +433,40 @@ function processDeposit() {
 	});
 
 	$("#depositModalAmount").val('');		
+}
+
+function processWithdraw() {
+	accountId = $("#withdrawModalTitle").attr("accountid");
+	amount = $("#withdrawModalAmount").val();
+
+	transactionRequest = {
+		"type":"Withdraw",
+		"amount":parseFloat(amount) * -1
+	};
+
+	$.ajax({
+		url: baseServerUrl + '/api/users/' + currentUserId + '/accounts/' + accountId + '/transactions',
+		type: 'POST',
+		data: JSON.stringify(transactionRequest),
+		dataType: 'json',
+		contentType: "application/json",
+		success:function(res){
+			console.log(JSON.stringify(res));
+			console.log(res.status + '; ' + typeof res.status);
+			if (res.status === "Success") {
+				$('#withdrawModal').modal('toggle');
+				loadAndShowAccounts();
+			} else { // NOT SUCCESS
+				console.log(JSON.stringify(res));
+			}
+		},
+		error:function(res, textStatus) { // NOT SUCCESS
+			console.log(JSON.stringify(res));
+			console.log(textStatus);
+		}
+	});
+
+	$("#withdrawModalAmount").val('');		
 }
 
 function loadAndShowTransactions() {

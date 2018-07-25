@@ -3,7 +3,6 @@ package domain;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,9 +11,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import core.DbBaseObject;
+import core.Logger;
 
 public class User extends DbBaseObject {
-    private static final Logger LOG = Logger.getLogger(User.class.getName());
+    private static final Logger LOG = new Logger(User.class);
 
     private String username;
 
@@ -89,18 +89,23 @@ public class User extends DbBaseObject {
     }
 
     public Account getAccountByHashCode(Integer accountHashCode) {
-        if (accountHashCode == null) return null;
+        LOG.log(Logger.Action.BEGIN, "accountHashCode");
+        try {
+            if (accountHashCode == null) return null;
 
-        Account targetAccount = null;
-        for (Account account : getAccounts()) {
-            LOG.info("User.getAccountByHashCode(): Checking account: " + account.getName() + " to see if it's id = " + accountHashCode);
+            Account targetAccount = null;
+            for (Account account : getAccounts()) {
+                LOG.info("User.getAccountByHashCode(): Checking account: " + account.getName() + " to see if it's id = " + accountHashCode);
 
-            if (account.hashCode() == accountHashCode) {
-                targetAccount = account;
-                break;
+                if (account.hashCode() == accountHashCode) {
+                    targetAccount = account;
+                    break;
+                }
             }
+            return targetAccount;
+        } finally {
+            LOG.log(Logger.Action.RETURN, "account");
         }
-        return targetAccount;
     }
 
     public void setAccounts(Collection<Account> accounts2) throws Exception {

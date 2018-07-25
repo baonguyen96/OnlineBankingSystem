@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import core.DbBaseObject;
+import core.Logger;
 
 public class Transaction extends DbBaseObject {
+    private static final Logger LOG = new Logger(Transaction.class);
 
     protected TransactionType type;
 
@@ -82,19 +84,30 @@ public class Transaction extends DbBaseObject {
 
     @JsonIgnore
     public boolean isValid() {
-        if (getAmount() == null) return false;
-        if (getType() == null) return false;
-        if (getAccount() == null) return false;
+        LOG.log(Logger.Action.BEGIN);
+        try {
+            if (getAmount() == null) return false;
+            if (getType() == null) return false;
+            if (getAccount() == null) return false;
 
-        if (getAmount().doubleValue() == 0.0) {
+            if (getAmount().doubleValue() == 0.0) {
+                return false;
+            } else if (getAmount().doubleValue() < 0.0) {
+
+                if (TransactionType.Withdraw == getType()) return true;
+
+                if (TransactionType.TransferOut == getType()) {
+                    if (getTransferFromAccount() == null) return false;
+                    if (getTransferToAccount() == null) return false;
+                    if (getAccount().equals(getTransferFromAccount())) return true;
+                }
+            } else if (getAmount().doubleValue() > 0.0) {
+                if (TransactionType.Deposit == getType()) return true;
+            }
             return false;
-        } else if (getAmount().doubleValue() < 0.0) {
-            if (TransactionType.Withdraw == getType()) return true;
-            if (TransactionType.TransferOut == getType() && getTransferToAccount() != null) return true;
-        } else if (getAmount().doubleValue() > 0.0) {
-            if (TransactionType.Deposit == getType()) return true;
+        } finally {
+            LOG.log(Logger.Action.RETURN, "boolean");
         }
-        return false;
     }
 
     @Override

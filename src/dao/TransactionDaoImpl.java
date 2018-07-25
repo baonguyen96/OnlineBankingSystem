@@ -30,6 +30,7 @@ public class TransactionDaoImpl implements TransactionDao {
         try {
             if (transaction == null) throw new Exception("cannot create a null transaction");
             if (transaction.getAccount() == null) throw new Exception("cannot create a transaction on a null account");
+            if (!transaction.isValid()) throw new Exception("transaction is not valid");
 
             Connection conn = null;
             PreparedStatement ps = null;
