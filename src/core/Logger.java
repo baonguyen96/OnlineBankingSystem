@@ -22,7 +22,7 @@ public class Logger {
     org.apache.logging.log4j.Logger log;
 
     private static final String BASE_DIR = "/Users/rwiles";
-    private static final boolean WRITE_SEQUENCE_DIAGRAMS = true;
+    private static final boolean WRITE_SEQUENCE_DIAGRAMS = false;
 
     private static Map<Thread, Stack<String>> classCallStack = new HashMap<>();;
     private static Map<Thread, Stack<String>> threadMethodCallStack = new HashMap<>();;
