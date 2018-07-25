@@ -104,7 +104,7 @@ public class AccountDaoImplTest {
         accountDao.createAccount(account);
 
         Connection conn = dbManager.getConnection();
-        Account retval = accountDao.getAccountById(conn, user, account.hashCode());
+        Account retval = accountDao.getAccount(conn, user, account.hashCode());
 
         assertAccount(account, retval);
     }

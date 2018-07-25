@@ -73,14 +73,6 @@ public class User extends DbBaseObject {
         this.recoverPasswordAnswer = StringUtils.trimToNull(recoverPasswordAnswer);
     }
 
-    public void clearAccountsList() {
-        if (accounts == null) {
-            accounts = new LinkedHashMap<>();
-        } else {
-            accounts.clear();
-        }
-    }
-
     public Collection<Account> getAccounts() {
         if (accounts == null) {
             accounts = new LinkedHashMap<>();

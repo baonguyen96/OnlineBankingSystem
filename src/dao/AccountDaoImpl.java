@@ -51,7 +51,7 @@ public class AccountDaoImpl implements AccountDao {
                 status = ps.executeUpdate();
 
                 if (status == 1) {
-                    account = getAccountById(conn, account.getUser(), account.hashCode());
+                    account = getAccount(conn, account.getUser(), account.hashCode());
                     LOG.info("Created new account for username:" + account.getUser().getUsername() + "; account: " + account.toString());
                 } else {
                     LOG.warn("Failed to create account for username " + account.getUser().getUsername());
@@ -116,7 +116,7 @@ public class AccountDaoImpl implements AccountDao {
         return user;
     }
 
-    Account getAccountById(Connection conn, User user, int accountHashCode) {
+    Account getAccount(Connection conn, User user, int accountHashCode) {
         LOG.log(Logger.Action.BEGIN, "dbConnection", "user", "accountHashCode");
         LOG.info("loading account by id: " + accountHashCode);
 
@@ -176,7 +176,7 @@ public class AccountDaoImpl implements AccountDao {
             ps.executeUpdate();
 
             DBUtils.closeQuietly(ps);
-            Account tmpAccount = getAccountById(conn, account.getUser(), account.hashCode());
+            Account tmpAccount = getAccount(conn, account.getUser(), account.hashCode());
             account.setBalance(tmpAccount.getBalance());
             account.setUpdatedOn(tmpAccount.getUpdatedOn());
         } catch (Exception e) {

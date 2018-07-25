@@ -49,7 +49,7 @@ TransactionController:logged in user=JsonServletBase.getUserFromSession(request)
 
 		AccountDaoImpl:dbConnection=DbManager.getConnection
 
-		AccountDaoImpl:account=AccountDaoImpl.getAccountById(dbConnection, user, accountHashCode)
+		AccountDaoImpl:account=AccountDaoImpl.getAccount(dbConnection, user, accountHashCode)
 
 		AccountDaoImpl:dbConnection=DbManager.getConnection
 
@@ -68,7 +68,7 @@ TransactionController:logged in user=JsonServletBase.getUserFromSession(request)
 
 			AccountDaoImpl:dbConnection=DbManager.getConnection
 
-			AccountDaoImpl:account=AccountDaoImpl.getAccountById(dbConnection, user, accountHashCode)
+			AccountDaoImpl:account=AccountDaoImpl.getAccount(dbConnection, user, accountHashCode)
 
 			AccountDaoImpl:dbConnection=DbManager.getConnection
 
