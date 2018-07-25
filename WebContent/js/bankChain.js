@@ -2,6 +2,7 @@ var baseServerUrl = "http://localhost:8080/OnlineBankingSystem";
 var loggedIn = false;
 var currentUserId = "";
 
+
 function resetAll() {
 	// set the menu options based on login status
 	if (loggedIn) {
@@ -259,6 +260,7 @@ function processRegistrationRequest() {
 				$("[name='loggedOutMenu']").hide();
 				$("#registerAlert").hide();
 				loggedIn = true;
+				currentUserId = res.id;
 				loadAndShowAccounts();
 			} else { // NOT SUCCESS
 				$("[name='loggedInMenu']").hide();
