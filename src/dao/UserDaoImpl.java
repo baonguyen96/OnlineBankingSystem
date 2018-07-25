@@ -11,7 +11,7 @@ import db.DbManager;
 import domain.Login;
 import domain.User;
 
-public class UserDaoImpl {
+public class UserDaoImpl implements UserDao {
     private static final Logger LOG = new Logger(UserDaoImpl.class);
 
     private DbManager db = new DbManager();
@@ -19,6 +19,7 @@ public class UserDaoImpl {
     /**
      * Attempts to create a new User, returns the User if it succeeds or null if it fails
      */
+    @Override
     public User register(User user) {
         LOG.log(Logger.Action.BEGIN, "user");
         Connection conn = null;
@@ -68,6 +69,7 @@ public class UserDaoImpl {
     /**
      * Validates the Login and returns the User if it succeeds or null on failure.
      */
+    @Override
     public User validateUser(Login login) {
         LOG.log(Logger.Action.BEGIN, "login");
         Connection conn = null;
