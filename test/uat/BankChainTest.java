@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import db.DbManager;
@@ -22,9 +24,12 @@ class BankChainTest {
     private WebDriver driver;
     private WebDriverWait wait;
     private String baseUrl;
+    enum Browser {Chrome, FireFox}
+    private Browser browser;
 
 
-    public BankChainTest() throws SQLException {
+    public BankChainTest(Browser browser) throws SQLException {
+	this.browser = browser;
 	setupSelenium();
 	clearDatabase();
     }
@@ -33,12 +38,21 @@ class BankChainTest {
     private void setupSelenium() {
 	if (System.getProperty("os.name").toLowerCase().startsWith("mac os x")) {
 	    System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver");
+		driver = new ChromeDriver();
 	}
 	else {
-	    System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver.exe");
+	    if(browser == Browser.Chrome) {
+		System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver.exe");
+		driver = new ChromeDriver();
+	    }
+	    else {
+		System.setProperty("webdriver.gecko.driver", "assets/driver/chromedriver.exe");
+		DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+		capabilities.setCapability("marionette", true);
+		driver = new FirefoxDriver(capabilities);
+	    }
 	}
 
-	driver = new ChromeDriver();
 	baseUrl = "http://localhost:8080/OnlineBankingSystem/index.html";
 	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
