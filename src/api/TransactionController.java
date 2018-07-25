@@ -27,6 +27,7 @@ public class TransactionController extends JsonServletBase<Transaction> {
 
     private static final String SUCCESS_STATUS = "Success";
     private static final String TRANSACTION_CREATION_FAILED_STATUS = "The transaction failed";
+    private static final String TRANSACTION_OVERDRAWN_FAILED_STATUS = "DUDE! That's more money than you have!";
     private static final String REQUIRED_FIELDS_MISSING_STATUS = "Required fields are missing";
 
     @Override
@@ -67,10 +68,21 @@ public class TransactionController extends JsonServletBase<Transaction> {
                     if (targetAccount == null || !transaction.isValid()) {
                         LOG.info("transaction was null or failed validation, " + (targetAccount == null) + ", " + (!transaction.isValid()));
                         transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
+                    }
+                    if ((TransactionType.Withdraw == transaction.getType() || TransactionType.TransferOut == transaction.getType()) //
+                            && targetAccount.getBalance().doubleValue() + transaction.getAmount().doubleValue() < 0) {
+                        LOG.info("transaction was withdraw or transfer out exceeded balance");
+                        transaction.setStatus(TRANSACTION_OVERDRAWN_FAILED_STATUS);
                     } else {
                         try {
                             transaction = new TransactionDaoImpl().createTransaction(transaction);
                             transaction.setStatus(SUCCESS_STATUS);
+
+                            if (transaction != null && TransactionType.TransferOut == transaction.getType()) {
+                                Transaction toTrans = transaction.cloneForTransfer();
+                                LOG.info(toTrans.toString());
+                                new TransactionDaoImpl().createTransaction(toTrans);
+                            }
                         } catch (Exception e) {
                             throw new ServletException(e);
                         }

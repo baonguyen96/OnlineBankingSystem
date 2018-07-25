@@ -39,6 +39,7 @@ public class TransactionDaoImpl implements TransactionDao {
 
             try {
                 conn = db.getConnection();
+
                 ps = conn.prepareStatement("INSERT INTO transaction " //
                         + "(id, account_id, type, amount, created_on, updated_on) " //
                         + "value (?, ?, ?, ?, ?, now())");

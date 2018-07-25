@@ -103,6 +103,7 @@ public class Transaction extends DbBaseObject {
                 }
             } else if (getAmount().doubleValue() > 0.0) {
                 if (TransactionType.Deposit == getType()) return true;
+                if (TransactionType.TransferIn == getType()) return true;
             }
             return false;
         } finally {
@@ -141,4 +142,16 @@ public class Transaction extends DbBaseObject {
         return true;
     }
 
+    public Transaction cloneForTransfer() {
+        LOG.log(Logger.Action.BEGIN);
+        if (TransactionType.TransferOut != getType()) return null;
+        if (!isValid()) return null;
+
+        Transaction clone = new Transaction();
+        clone.type = TransactionType.TransferIn;
+        clone.amount = getAmount().negate();
+        clone.account = getTransferToAccount();
+        LOG.log(Logger.Action.RETURN, "transfer to transaction");
+        return clone;
+    }
 }

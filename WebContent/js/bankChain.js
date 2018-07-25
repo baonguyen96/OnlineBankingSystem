@@ -89,6 +89,10 @@ $(document).ready(function() {
 	$("#withdrawSubmitButton").click(function() {
 		processWithdraw();		
 	});
+
+	$("#transferSubmitButton").click(function() {
+		processTransfer();		
+	});
 });
 
 function isValidSSN(value) {
@@ -303,6 +307,7 @@ function loadAndShowAccounts() {
 			html += "</div>";
 			$(html).appendTo(accountsList);
 			
+			var numOfAccounts = $(accounts).length;
 			$(accounts).each(function() {
 				var row = $("<div class='row'></div>");
 				$("<div class='col-md-2'>" + this.name + "</div>").appendTo(row);
@@ -332,7 +337,7 @@ function loadAndShowAccounts() {
 				$(depositButton).appendTo(buttonDiv);
 				buttonDiv.appendTo(row);
 
-				console.log(this.balance + ' > 0 = ' + (parseFloat(this.balance) > 0));
+				console.log('numOfAccounts = ' + numOfAccounts);
 
 				if (parseFloat(this.balance) > 0) {
 					buttonDiv = $("<div class='col-md-1'></div>")
@@ -345,6 +350,40 @@ function loadAndShowAccounts() {
 					})
 					$(withdrawButton).appendTo(buttonDiv);
 					buttonDiv.appendTo(row);
+
+					if (numOfAccounts > 1) {
+						var currentAccountId = this.id;
+
+						buttonDiv = $("<div class='col-md-1'></div>")
+						var transferButton = $("<button accountId='" + this.id + "' accountName='" + this.name + "' class='btn btn-primary btn-link btn-sm'>Transfer Out</button>")
+						$(transferButton).click(function() {
+							transferModalTitle = $("#transferModalTitle");
+							transferModalTitle.html("Transfer from " + $(this).attr('accountName'));
+							transferModalTitle.attr("accountId", $(this).attr('accountId'));
+
+							$.ajax({
+								url: baseServerUrl + '/api/users/' + currentUserId + '/accounts',
+								type: 'GET',
+								data: null, 
+								dataType: 'json',
+								contentType: "application/json",
+								success:function(accounts){
+									toSelect = $('#transferToAccount');
+									toSelect.empty();
+
+									$(accounts).each(function() {
+										if (this.id != currentAccountId) {
+											var opt = $("<option accountToId='" + this.id + "'>" + this.name + "</option>");
+											opt.appendTo(toSelect);
+										}
+									});
+								}
+							});
+							$("#transferModal").modal();
+						})
+						$(transferButton).appendTo(buttonDiv);
+						buttonDiv.appendTo(row);
+					}
 				}
 
 				$(row).appendTo(accountsList);
@@ -455,18 +494,74 @@ function processWithdraw() {
 			console.log(res.status + '; ' + typeof res.status);
 			if (res.status === "Success") {
 				$('#withdrawModal').modal('toggle');
+				withdrawAlertDiv.hide();
 				loadAndShowAccounts();
 			} else { // NOT SUCCESS
 				console.log(JSON.stringify(res));
-			}
+				withdrawAlertDiv = $("#withdrawTransactionAlert");
+				withdrawAlertDiv.empty();
+				$('<span>' + res.status + '</span>').appendTo(withdrawAlertDiv);
+				withdrawAlertDiv.show();
+				}
 		},
 		error:function(res, textStatus) { // NOT SUCCESS
 			console.log(JSON.stringify(res));
 			console.log(textStatus);
+			withdrawAlertDiv = $("#withdrawTransactionAlert");
+			withdrawAlertDiv.empty();
+			$('<span>' + res.status + '</span>').appendTo(withdrawAlertDiv);
+			withdrawAlertDiv.show();
+		// 
 		}
 	});
 
 	$("#withdrawModalAmount").val('');		
+}
+
+function processTransfer() {
+	accountId = $("#transferModalTitle").attr("accountid");
+	amount = $("#transferModalAmount").val();
+
+	accountToId = $('#transferToAccount').find(":selected").attr('accountToId');
+	console.log('accountToId=' + accountToId);
+
+	transactionRequest = {
+		"type":"TransferOut",
+		"amount":parseFloat(amount) * -1
+	};
+
+	$.ajax({
+		url: baseServerUrl + '/api/users/' + currentUserId + '/accounts/' + accountId + '/' + accountToId + '/transactions',
+		type: 'POST',
+		data: JSON.stringify(transactionRequest),
+		dataType: 'json',
+		contentType: "application/json",
+		success:function(res){
+			console.log(JSON.stringify(res));
+			console.log(res.status + '; ' + typeof res.status);
+			if (res.status === "Success") {
+				$('#transferModal').modal('toggle');
+				transferAlertDiv.hide();
+				loadAndShowAccounts();
+			} else { // NOT SUCCESS
+				console.log(JSON.stringify(res));
+				transferAlertDiv = $("#transferTransactionAlert");
+				transferAlertDiv.empty();
+				$('<span>' + res.status + '</span>').appendTo(transferAlertDiv);
+				transferAlertDiv.show();
+				}
+		},
+		error:function(res, textStatus) { // NOT SUCCESS
+			console.log(JSON.stringify(res));
+			console.log(textStatus);
+			transferAlertDiv = $("#transferTransactionAlert");
+			transferAlertDiv.empty();
+			$('<span>' + res.status + '</span>').appendTo(transferAlertDiv);
+			transferAlertDiv.show();
+		}
+	});
+
+	$("#transferModalAmount").val('');		
 }
 
 function loadAndShowTransactions() {

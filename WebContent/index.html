@@ -303,6 +303,41 @@
 								</div>
 								<button type="button" id="withdrawSubmitButton" class="btn btn-primary">Submit</button>
 							</form>
+							<div id="withdrawTransactionAlert" class="alert alert-danger" role="alert" style="display: none"></div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="transferModal" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-lg">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 id="transferModalTitle" class="modal-title">Transfer from</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-md-9">
+							<form>
+								<div class="form-group">
+									<label for="transferModalAmount">Amount to Transfer:</label>
+									<input type="text" class="form-control" id="transferModalAmount" aria-describedby="transferHelp" placeholder="How much money do you want to transfer?">
+								</div>
+								<div class="form-group">
+									<label for="transferModalAmount">Transfer to Account:</label>
+									<select class="form-control" id="transferToAccount"></select>
+								</div>
+								<button type="button" id="transferSubmitButton" class="btn btn-primary">Submit</button>
+							</form>
+							<div id="transferTransactionAlert" class="alert alert-danger" role="alert" style="display: none"></div>
 						</div>
 					</div>
 				</div>
