@@ -2,6 +2,7 @@ package domain;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -77,11 +78,6 @@ public class Transaction extends DbBaseObject {
         this.transferToAccount = transferToAccount;
     }
 
-    @JsonProperty(access = Access.READ_ONLY)
-    public int getId() {
-        return hashCode();
-    }
-
     @JsonIgnore
     public boolean isValid() {
         LOG.log(Logger.Action.BEGIN);
@@ -117,6 +113,8 @@ public class Transaction extends DbBaseObject {
     }
 
     @Override
+    @JsonGetter(value = "id")
+    @JsonProperty(access = Access.READ_ONLY)
     public int hashCode() {
         final int prime = 31;
         int result = 1;

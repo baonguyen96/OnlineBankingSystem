@@ -81,7 +81,7 @@ public class TransactionDaoImpl implements TransactionDao {
     @Override
     public Account loadTransactions(Account account) {
         LOG.log(Logger.Action.BEGIN, "account");
-        LOG.info("loading accounts for user: " + account.getId());
+        LOG.info("loading accounts for user: " + account.hashCode());
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -93,8 +93,8 @@ public class TransactionDaoImpl implements TransactionDao {
                     + " id, account_id, type, amount, created_on, updated_on" //
                     + " FROM transaction" // 
                     + " WHERE account_id = ?" //
-                    + " ORDER BY id DESC");
-            ps.setLong(1, account.getId());
+                    + " ORDER BY created_on DESC");
+            ps.setLong(1, account.hashCode());
 
             rs = ps.executeQuery();
 
@@ -104,11 +104,11 @@ public class TransactionDaoImpl implements TransactionDao {
                 transaction.setAccount(account);
                 transaction.setType(TransactionType.valueOf(rs.getString("type")));
                 transaction.setAmount(rs.getBigDecimal("amount"));
-                transaction.setCreatedOn(rs.getDate("created_on"));
-                transaction.setUpdatedOn(rs.getDate("updated_on"));
+                transaction.setCreatedOn(rs.getTimestamp("created_on"));
+                transaction.setUpdatedOn(rs.getTimestamp("updated_on"));
                 transactions.add(transaction);
 
-                LOG.info("loaded account " + transaction.getId() + " + for user: " + transaction.getId());
+                LOG.info("loaded account " + transaction.hashCode() + " + for user: " + transaction.hashCode());
             }
             account.setTransactions(transactions);
 

@@ -111,8 +111,8 @@ public class UserDaoImpl {
                 user.setUsername(rs.getString("username"));
                 user.setName(rs.getString("full_name"));
                 user.setRecoverPasswordQuestion(rs.getString("recover_password_question"));
-                user.setCreatedOn(rs.getDate("created_on"));
-                user.setUpdatedOn(rs.getDate("updated_on"));
+                user.setCreatedOn(rs.getTimestamp("created_on"));
+                user.setUpdatedOn(rs.getTimestamp("updated_on"));
 
                 // It's bad security to load these back out of the database
                 // user.setPassword(rs.getString("password"));

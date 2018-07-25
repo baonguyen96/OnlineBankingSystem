@@ -2,7 +2,6 @@ var baseServerUrl = "http://localhost:8080/OnlineBankingSystem";
 var loggedIn = false;
 var currentUserId = "";
 
-
 function resetAll() {
 	// set the menu options based on login status
 	if (loggedIn) {
@@ -496,6 +495,7 @@ function processWithdraw() {
 			console.log(res.status + '; ' + typeof res.status);
 			if (res.status === "Success") {
 				$('#withdrawModal').modal('toggle');
+				withdrawAlertDiv = $("#withdrawTransactionAlert");
 				withdrawAlertDiv.hide();
 				loadAndShowAccounts();
 			} else { // NOT SUCCESS
@@ -543,6 +543,7 @@ function processTransfer() {
 			console.log(res.status + '; ' + typeof res.status);
 			if (res.status === "Success") {
 				$('#transferModal').modal('toggle');
+				transferAlertDiv = $("#transferTransactionAlert");
 				transferAlertDiv.hide();
 				loadAndShowAccounts();
 			} else { // NOT SUCCESS

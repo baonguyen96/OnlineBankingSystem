@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -68,17 +69,14 @@ public class Account extends DbBaseObject {
         this.status = status;
     }
 
-    @JsonProperty(access = Access.READ_ONLY)
-    public int getId() {
-        return hashCode();
-    }
-
     @Override
     public String toString() {
         return "Account [user=" + ((user != null) ? user.getUsername() : "") + ", name=" + name + ", balance=" + balance + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", transactions=" + transactions + ", status=" + status + "]";
     }
 
     @Override
+    @JsonGetter(value = "id")
+    @JsonProperty(access = Access.READ_ONLY)
     public int hashCode() {
         final int prime = 31;
         int result = 1;

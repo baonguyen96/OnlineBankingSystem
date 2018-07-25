@@ -99,8 +99,8 @@ public class AccountDaoImpl implements AccountDao {
                 account.setUser(user);
                 account.setName(rs.getString("name"));
                 account.setBalance(rs.getBigDecimal("balance"));
-                account.setCreatedOn(rs.getDate("created_on"));
-                account.setUpdatedOn(rs.getDate("updated_on"));
+                account.setCreatedOn(rs.getTimestamp("created_on"));
+                account.setUpdatedOn(rs.getTimestamp("updated_on"));
                 accounts.add(account);
 
                 LOG.info("loaded account " + account.hashCode() + " + for user: " + user.hashCode());
@@ -139,8 +139,8 @@ public class AccountDaoImpl implements AccountDao {
                 account.setUser(user);
                 account.setName(rs.getString("name"));
                 account.setBalance(rs.getBigDecimal("balance"));
-                account.setCreatedOn(rs.getDate("created_on"));
-                account.setUpdatedOn(rs.getDate("updated_on"));
+                account.setCreatedOn(rs.getTimestamp("created_on"));
+                account.setUpdatedOn(rs.getTimestamp("updated_on"));
                 user.addAccount(account);
                 LOG.info("loaded account: " + account.hashCode());
             }
