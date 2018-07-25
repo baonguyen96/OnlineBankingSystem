@@ -32,17 +32,18 @@ class BankChainTest {
 
     private void setupSelenium() {
 	if (System.getProperty("os.name").toLowerCase().startsWith("mac os x")) {
-            System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver");
-        } 
+	    System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver");
+	}
 	else {
-            System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver.exe");
-        }
-	
+	    System.setProperty("webdriver.chrome.driver", "assets/driver/chromedriver.exe");
+	}
+
 	driver = new ChromeDriver();
 	baseUrl = "http://localhost:8080/OnlineBankingSystem/index.html";
 	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
 	wait = new WebDriverWait(driver, 30);
+	driver.manage().window().maximize();
     }
 
 
@@ -75,8 +76,8 @@ class BankChainTest {
 	testDepositPositiveAmountAccepted();
 	testViewTransaction();
 	testWithdrawNegativeAmountRejected();
-	testWithdrawPositiveAmountMoreThanBalanceRejected(); // not yet implemented in the code
-	testWithdrawPositiveAmountLessThanBalanceAccepted(); // not yet implemented in the code
+	testWithdrawPositiveAmountMoreThanBalanceRejected(); 
+	testWithdrawPositiveAmountLessThanBalanceAccepted();
 
 	quit();
     }
@@ -87,13 +88,6 @@ class BankChainTest {
 	    driver.get(baseUrl);
 	    pause(2);
 	    assertEquals("BankChain", driver.findElement(By.linkText("BankChain")).getText());
-	    // assertEquals("Home", driver.findElement(By.id("menuHome")).getText());
-	    // assertEquals("Services",
-	    // driver.findElement(By.id("menuServices")).getText());
-	    // assertEquals("Products",
-	    // driver.findElement(By.id("menuProducts")).getText());
-	    // assertEquals("Welcome to BankChain® Bank",
-	    // driver.findElement(By.cssSelector("h1")).getText());
 	    assertEquals("Sign-Up", driver.findElement(By.id("registerButton")).getText());
 	    assertEquals("Login", driver.findElement(By.xpath("(//button[@type='button'])[4]")).getText());
 
@@ -358,7 +352,21 @@ class BankChainTest {
 
     private void testWithdrawNegativeAmountRejected() {
 	try {
-	    fail("Unimplemented");
+	    assertEquals("3", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
+	    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[6]/button")).click();
+	    pause(2);
+	    assertEquals("Withdraw from Checking", driver.findElement(By.id("withdrawModalTitle")).getText());
+	    assertEquals("Withdrawal Ammount:",
+		    driver.findElement(By.xpath("//div[@id='withdrawModal']/div/div/div[2]/div/div/form/div/label"))
+			    .getText());
+	    driver.findElement(By.id("withdrawModalAmount")).click();
+	    driver.findElement(By.id("withdrawModalAmount")).clear();
+	    driver.findElement(By.id("withdrawModalAmount")).sendKeys("-1");
+	    driver.findElement(By.id("withdrawSubmitButton")).click();
+	    pause(2);
+	    driver.findElement(By.xpath("(//button[@type='button'])[16]")).click();
+	    assertEquals("3", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
+
 	    log("Test Deposit Negative Amount Rejected: Pass");
 	}
 	catch (Throwable e) {
@@ -373,7 +381,16 @@ class BankChainTest {
 
     private void testWithdrawPositiveAmountMoreThanBalanceRejected() {
 	try {
-	    fail("Unimplemented");
+	    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[6]/button")).click();
+	    pause(2);
+	    driver.findElement(By.id("withdrawModalAmount")).click();
+	    driver.findElement(By.id("withdrawModalAmount")).clear();
+	    driver.findElement(By.id("withdrawModalAmount")).sendKeys("5");	// rejected
+	    driver.findElement(By.id("withdrawSubmitButton")).click();
+	    pause(2);
+	    driver.findElement(By.xpath("(//button[@type='button'])[16]")).click();
+	    assertEquals("3", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
+	    
 	    log("Test Withdraw Positive Amount More Than Balance Rejected: Pass");
 	}
 	catch (Throwable e) {
@@ -388,7 +405,14 @@ class BankChainTest {
 
     private void testWithdrawPositiveAmountLessThanBalanceAccepted() {
 	try {
-	    fail("Unimplemented");
+	    driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[6]/button")).click();
+	    pause(2);
+	    driver.findElement(By.id("withdrawModalAmount")).click();
+	    driver.findElement(By.id("withdrawModalAmount")).clear();
+	    driver.findElement(By.id("withdrawModalAmount")).sendKeys("2");
+	    driver.findElement(By.id("withdrawSubmitButton")).click();
+	    assertEquals("1", driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[3]")).getText());
+	    
 	    log("Test Withdraw Positive Amount Less Than Balance Accepted: Pass");
 	}
 	catch (Throwable e) {
@@ -400,21 +424,6 @@ class BankChainTest {
 	}
     }
 
-
-    /*
-     * driver.get("http://localhost:8080/OnlineBankingSystem/index.html");
-     * driver.findElement(By.xpath("//ul[@id='accountsList']/div[2]/div[5]/button"))
-     * .click(); try { assertEquals("7/23/2018, 7:00:00 PM",
-     * driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div")).
-     * getText()); } catch (Error e) { verificationErrors.append(e.toString()); }
-     * try { assertEquals("Deposit",
-     * driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div[2]")).
-     * getText()); } catch (Error e) { verificationErrors.append(e.toString()); }
-     * try { assertEquals("3",
-     * driver.findElement(By.xpath("//ul[@id='transactionsList']/div[2]/div[3]")).
-     * getText()); } catch (Error e) { verificationErrors.append(e.toString()); }
-     * driver.findElement(By.xpath("(//button[@type='button'])[15]")).click();
-     */
 
     private void testViewTransaction() {
 	try {
