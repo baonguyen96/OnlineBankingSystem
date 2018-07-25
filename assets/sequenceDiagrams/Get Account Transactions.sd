@@ -1,0 +1,39 @@
+#![Get Account Transactions]
+user:Actor
+webBrowser:WebBrowser
+JsonServletBase:JsonServletBase[a]
+AccountController:AccountController[a]
+AccountDaoImpl:AccountDaoImpl[a]
+DbManager:DbManager[a]
+User:User[a]
+TransactionDaoImpl:TransactionDaoImpl[a]
+
+user:webBrowser.
+webBrowser:account=JsonServletBase.doGet(request, response)
+
+JsonServletBase:is valid session required=AccountController.requireValidSession
+
+JsonServletBase:account=AccountController.processGet(request, response)
+
+AccountController:requested variable=JsonServletBase.getUriPathVariableAsInteger(request, varName)
+
+AccountController:logged in user=JsonServletBase.getUserFromSession(request)
+
+[c:alt user != null]
+	AccountController:userWithAccounts=AccountDaoImpl.loadAccounts(user)
+
+	AccountDaoImpl:dbConnection=DbManager.getConnection
+
+	AccountController:account=User.getAccountByHashCode(accountHashCode)
+
+	[c:alt account != null]
+		AccountController:account=TransactionDaoImpl.loadTransactions(account)
+
+		TransactionDaoImpl:dbConnection=DbManager.getConnection
+
+	[/c]
+[/c]
+JsonServletBase:JSON=JsonServletBase.objectToJson(objects to convert)
+
+JsonServletBase[1]:=JsonServletBase.writeJsonResponse(response, returnJsonString)
+

@@ -36,22 +36,26 @@ public class RegistrationController extends JsonServletBase<User> {
         LOG.log(Logger.Action.BEGIN, "request", "response", "user");
         LOG.info(user.toString());
 
-        if (user.getUsername() == null //
-                || user.getPassword() == null //
-                || user.getName() == null //
-                || user.getRecoverPasswordQuestion() == null //
-                || user.getRecoverPasswordAnswer() == null) {
+        user.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
 
-            user.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
-        } else {
+        LOG.log(Logger.Action.ALT_START, "user has required fields");
+        if (user.getUsername() != null //
+                && user.getPassword() != null //
+                && user.getName() != null //
+                && user.getRecoverPasswordQuestion() != null //
+                && user.getRecoverPasswordAnswer() != null) {
             User registeredUser = new UserDaoImpl().register(user);
+            LOG.log(Logger.Action.ALT_START, "session created");
             if (createNewUserSession(request, user)) {
                 user = registeredUser;
                 user.setStatus(SUCCESS_STATUS);
             } else {
                 user.setStatus(REGISTRATION_FAILED_STATUS);
             }
+            LOG.log(Logger.Action.ALT_END);
         }
+        LOG.log(Logger.Action.ALT_END);
+
         user.setPassword(null); // because security
         user.setRecoverPasswordAnswer(null); // because security
 

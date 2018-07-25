@@ -1,0 +1,37 @@
+#![Create Account]
+user:Actor
+webBrowser:WebBrowser
+JsonServletBase:JsonServletBase[a]
+AccountController:AccountController[a]
+AccountDaoImpl:AccountDaoImpl[a]
+DbManager:DbManager[a]
+
+user:webBrowser.
+webBrowser:account=JsonServletBase.doPost(request, response)
+
+JsonServletBase:is valid session required=AccountController.requireValidSession
+
+JsonServletBase:payload text=JsonServletBase.readRequestAsString(request)
+
+JsonServletBase[1]:java objects=JsonServletBase.jsonToObject(JSON)
+
+JsonServletBase[1]:account=AccountController.processPost(request, response, account)
+
+AccountController:logged in user=JsonServletBase.getUserFromSession(request)
+
+[c:alt user != null && account != null]
+	[c:alt account.getName() != null]
+		AccountController:account=AccountDaoImpl.createAccount(account)
+
+		AccountDaoImpl:dbConnection=DbManager.getConnection
+
+		AccountDaoImpl:account=AccountDaoImpl.getAccountById(dbConnection, user, accountHashCode)
+
+		AccountDaoImpl:dbConnection=DbManager.getConnection
+
+	[/c]
+[/c]
+JsonServletBase:JSON=JsonServletBase.objectToJson(objects to convert)
+
+JsonServletBase[1]:=JsonServletBase.writeJsonResponse(response, returnJsonString)
+

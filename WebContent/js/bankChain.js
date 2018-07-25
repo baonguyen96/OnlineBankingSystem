@@ -461,14 +461,24 @@ function processDeposit() {
 			console.log(res.status + '; ' + typeof res.status);
 			if (res.status === "Success") {
 				$('#depositModal').modal('toggle');
+				depositAlertDiv = $("#depositTransactionAlert");
+				depositAlertDiv.hide();
 				loadAndShowAccounts();
 			} else { // NOT SUCCESS
 				console.log(JSON.stringify(res));
+				depositAlertDiv = $("#depositTransactionAlert");
+				depositAlertDiv.empty();
+				$('<span>' + res.status + '</span>').appendTo(depositAlertDiv);
+				depositAlertDiv.show();				
 			}
 		},
 		error:function(res, textStatus) { // NOT SUCCESS
 			console.log(JSON.stringify(res));
 			console.log(textStatus);
+			depositAlertDiv = $("#depositTransactionAlert");
+			depositAlertDiv.empty();
+			$('<span>' + res.status + '</span>').appendTo(depositAlertDiv);
+			depositAlertDiv.show();
 		}
 	});
 
@@ -504,7 +514,7 @@ function processWithdraw() {
 				withdrawAlertDiv.empty();
 				$('<span>' + res.status + '</span>').appendTo(withdrawAlertDiv);
 				withdrawAlertDiv.show();
-				}
+			}
 		},
 		error:function(res, textStatus) { // NOT SUCCESS
 			console.log(JSON.stringify(res));

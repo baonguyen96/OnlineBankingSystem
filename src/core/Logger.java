@@ -16,13 +16,13 @@ import org.apache.logging.log4j.LogManager;
 
 public class Logger {
     public enum Action {
-        BEGIN, RETURN
+        BEGIN, RETURN, START_LOOP, END_LOOP, ALT_START, ALT_ELSE, ALT_END
     };
 
     org.apache.logging.log4j.Logger log;
 
     private static final String BASE_DIR = "/Users/rwiles";
-    private static final boolean WRITE_SEQUENCE_DIAGRAMS = false;
+    private static final boolean WRITE_SEQUENCE_DIAGRAMS = true;
 
     private static Map<Thread, Stack<String>> classCallStack = new HashMap<>();;
     private static Map<Thread, Stack<String>> threadMethodCallStack = new HashMap<>();;
@@ -46,11 +46,11 @@ public class Logger {
     private int findMatchingReturnIndex(List<SequenceCall> seqs, int currSeqIndex) {
         SequenceCall seq = seqs.get(currSeqIndex);
 
-        if (seq.isCall) {
+        if (seq.isCall()) {
             int stackDepth = 0;
             for (int j = currSeqIndex; j < seqs.size(); j++) {
-                if (seqs.get(j).isCall) stackDepth++;
-                else stackDepth--;
+                if (seqs.get(j).isCall()) stackDepth++;
+                else if (seqs.get(j).isReturn()) stackDepth--;
                 if (stackDepth == 0) {
                     return j;
                 }
@@ -59,9 +59,19 @@ public class Logger {
         return -1;
     }
 
+    private String getTabs(int tabCount) {
+        String s = "";
+        for (int i = 0; i < tabCount; i++) {
+            s += "\t";
+        }
+        return s;
+    }
+
     void logSequenceCalls() {
 
         Thread thread = Thread.currentThread();
+
+        int tabs = 0;
 
         if (WRITE_SEQUENCE_DIAGRAMS) {
             String dirName = BASE_DIR + File.separator + "sequenceDiagrams";
@@ -102,29 +112,32 @@ public class Logger {
             for (int i = 0; i < seqs.size(); i++) {
                 SequenceCall seq = seqs.get(i);
 
-                if (seq.isCall) {
+                if (seq.isCall()) {
                     actualClassMethod = seq.calledClass + "." + seq.calledMethod;
                     actualFromClassMethod = seq.calledFromClass + "." + seq.calledFromMethod;
                     classStackDepth.put(seq.calledClass, classStackDepth.getOrDefault(seq.calledClass, 0) + 1);
-                } else {
+                } else if (seq.isReturn()) {
                     actualClassMethod = seq.calledFromClass + "." + seq.calledFromMethod;
                     classStackDepth.put(seq.calledClass, classStackDepth.get(seq.calledClass) - 1);
                 }
 
-                sb.append("#    [" + i + "]: " + seq.toString() + "\n");
-                if (seq.isCall) {
-                    int retSeqIndex = findMatchingReturnIndex(seqs, i);
-                    if (retSeqIndex != -1) sb.append("#         Returns @ index " + retSeqIndex + "\n");
-                }
+                // begin seq diagram comments
+                //                sb.append("#    [" + i + "]: " + seq.toString() + "\n");
+                //                if (seq.isCall()) {
+                //                    int retSeqIndex = findMatchingReturnIndex(seqs, i);
+                //                    if (retSeqIndex != -1) sb.append("#         Returns @ index " + retSeqIndex + "\n");
+                //                }
+                // end seq diagram comments
 
-                if (seq.isCall) {
+                if (seq.isCall()) {
                     String graphClassMethod = actualClassMethod;
 
-                    if (seq.isCall) classStackDepth.put(seq.calledClass, classStackDepth.getOrDefault(seq.calledClass, 0) + 1);
+                    if (seq.isCall()) classStackDepth.put(seq.calledClass, classStackDepth.getOrDefault(seq.calledClass, 0) + 1);
 
                     int retSeqIndex = findMatchingReturnIndex(seqs, i);
                     SequenceCall retSeq = seqs.get(retSeqIndex);
 
+                    sb.append(getTabs(tabs));
                     if (!names.contains(seq.calledFromClass)) sb.append("webBrowser");
                     else sb.append(seq.calledFromClass);
 
@@ -137,6 +150,14 @@ public class Logger {
 
                     prevGraphClass = seq.calledClass;
                     prevGraphClassMethod = graphClassMethod;
+                } else if (Action.ALT_START == seq.action) {
+                    sb.append(getTabs(tabs) + "[c:alt " + seq.returnedVal + "]\n");
+                    tabs++;
+                } else if (Action.ALT_ELSE == seq.action) {
+                    sb.append(getTabs(tabs) + "--[" + seq.returnedVal + "]\n");
+                } else if (Action.ALT_END == seq.action) {
+                    tabs--;
+                    sb.append(getTabs(tabs) + "[/c]\n");
                 }
             }
 
@@ -190,7 +211,7 @@ public class Logger {
             classStack.push(className);
             methodStack.push(methodNameWithParams);
 
-            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(true, callersClass, callersMethod, className, methodNameWithParams, null));
+            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(action, callersClass, callersMethod, className, methodNameWithParams, null));
 
         } else if (Action.RETURN == action) {
 
@@ -202,7 +223,13 @@ public class Logger {
             if (!classStack.empty()) callersClass = classStack.peek();
             if (!methodStack.empty()) callersMethod = methodStack.peek();
 
-            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(false, callersClass, callersMethod, className, methodNameWithParams, implode(parameterOrReturnValueNames)));
+            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(action, callersClass, callersMethod, className, methodNameWithParams, implode(parameterOrReturnValueNames)));
+        } else if (Action.ALT_START == action) {
+            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(action, null, null, className, methodNameWithParams, implode(parameterOrReturnValueNames)));
+        } else if (Action.ALT_ELSE == action) {
+            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(action, null, null, className, methodNameWithParams, implode(parameterOrReturnValueNames)));
+        } else if (Action.ALT_END == action) {
+            activeSequences.computeIfAbsent(thread, t -> new ArrayList<>()).add(new SequenceCall(action, null, null, className, methodNameWithParams, implode(parameterOrReturnValueNames)));
         }
 
         StringBuilder sb = new StringBuilder();
@@ -256,16 +283,16 @@ public class Logger {
     }
 
     class SequenceCall {
-        boolean isCall; // is this a call or a return
+        Action action;
         String calledFromClass;
         String calledFromMethod;
         String calledClass;
         String calledMethod;
         String returnedVal;
 
-        public SequenceCall(boolean isCall, String calledFromClass, String calledFromMethod, String calledClass, String calledMethod, String returnedVal) {
+        public SequenceCall(Action action, String calledFromClass, String calledFromMethod, String calledClass, String calledMethod, String returnedVal) {
             super();
-            this.isCall = isCall;
+            this.action = action;
             this.calledFromClass = calledFromClass;
             this.calledFromMethod = calledFromMethod;
             this.calledClass = calledClass;
@@ -273,10 +300,19 @@ public class Logger {
             this.returnedVal = returnedVal;
         }
 
+        boolean isCall() {
+            return Action.BEGIN == action;
+        }
+
+        boolean isReturn() {
+            return Action.RETURN == action;
+        }
+
         @Override
         public String toString() {
-            if (isCall) return "call from " + calledFromClass + "." + calledFromMethod + " to " + calledClass + "." + calledMethod + ", returnedVal=" + returnedVal;
-            else return "return to " + calledFromClass + "." + calledFromMethod + " from " + calledClass + "." + calledMethod + ", returnedVal=" + returnedVal;
+            if (isCall()) return "call from " + calledFromClass + "." + calledFromMethod + " to " + calledClass + "." + calledMethod + ", returnedVal=" + returnedVal;
+            else if (isReturn()) return "return to " + calledFromClass + "." + calledFromMethod + " from " + calledClass + "." + calledMethod + ", returnedVal=" + returnedVal;
+            else return action.name().toLowerCase() + " " + calledFromClass + "." + calledFromMethod + " from " + calledClass + "." + calledMethod + ", returnedVal=" + returnedVal;
         }
     }
 }

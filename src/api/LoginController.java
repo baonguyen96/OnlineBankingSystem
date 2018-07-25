@@ -35,16 +35,19 @@ public class LoginController extends JsonServletBase<Login> {
         LOG.setScenarioName("User Login");
         LOG.log(Logger.Action.BEGIN, "request", "response", "login request");
 
-        if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
-            loginRequest.setStatus(INVALID_STATUS);
-        } else {
+        loginRequest.setStatus(INVALID_STATUS);
+
+        LOG.log(Logger.Action.ALT_START, "username != null && password != null");
+        if (loginRequest.getUsername() != null && loginRequest.getPassword() != null) {
             User user = new UserDaoImpl().validateUser(loginRequest);
+            LOG.log(Logger.Action.ALT_START, "session created");
             if (createNewUserSession(request, user)) {
                 loginRequest.setStatus(SUCCESS_STATUS);
-            } else {
-                loginRequest.setStatus(INVALID_STATUS);
             }
+            LOG.log(Logger.Action.ALT_END);
         }
+        LOG.log(Logger.Action.ALT_END);
+
         loginRequest.setPassword(null); // because security
 
         LOG.log(Logger.Action.RETURN, "login status");

@@ -49,49 +49,52 @@ public class TransactionController extends JsonServletBase<Transaction> {
             Integer accountId = getUriPathVariableAsInteger(request, "accountId");
             Integer transferToAccountId = getUriPathVariableAsInteger(request, "transferToAccountId");
 
-            if (accountId == null || transaction.getAmount() == null) transaction.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
-            else {
-                User user = getUserFromSession(request);
+            String status = REQUIRED_FIELDS_MISSING_STATUS;
+            User user = getUserFromSession(request);
 
-                if (user != null) {
-                    user = new AccountDaoImpl().loadAccounts(user);
+            LOG.log(Logger.Action.ALT_START, "account != null && transactionAmount != null");
+            if (accountId != null && transaction.getAmount() != null) {
 
-                    Account targetAccount = user.getAccountByHashCode(accountId);
-                    Account transferToAccount = user.getAccountByHashCode(transferToAccountId);
+                user = new AccountDaoImpl().loadAccounts(user);
 
-                    transaction.setAccount(targetAccount);
-                    if (TransactionType.TransferOut == transaction.getType()) {
-                        transaction.setTransferFromAccount(targetAccount);
-                        transaction.setTransferToAccount(transferToAccount);
-                    }
+                Account targetAccount = user.getAccountByHashCode(accountId);
+                Account transferToAccount = user.getAccountByHashCode(transferToAccountId);
 
-                    if (targetAccount == null || !transaction.isValid()) {
-                        LOG.info("transaction was null or failed validation, " + (targetAccount == null) + ", " + (!transaction.isValid()));
-                        transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
-                    }
-                    if ((TransactionType.Withdraw == transaction.getType() || TransactionType.TransferOut == transaction.getType()) //
-                            && targetAccount.getBalance().doubleValue() + transaction.getAmount().doubleValue() < 0) {
-                        LOG.info("transaction was withdraw or transfer out exceeded balance");
-                        transaction.setStatus(TRANSACTION_OVERDRAWN_FAILED_STATUS);
-                    } else {
-                        try {
-                            transaction = new TransactionDaoImpl().createTransaction(transaction);
-                            transaction.setStatus(SUCCESS_STATUS);
-
-                            if (transaction != null && TransactionType.TransferOut == transaction.getType()) {
-                                Transaction toTrans = transaction.cloneForTransfer();
-                                LOG.info(toTrans.toString());
-                                new TransactionDaoImpl().createTransaction(toTrans);
-                            }
-                        } catch (Exception e) {
-                            throw new ServletException(e);
-                        }
-                    }
-                } else {
-                    LOG.error("AccountController.processGetAll(): user was unexpectedly null");
-                    transaction.setStatus(TRANSACTION_CREATION_FAILED_STATUS);
+                transaction.setAccount(targetAccount);
+                if (TransactionType.TransferOut == transaction.getType()) {
+                    transaction.setTransferFromAccount(targetAccount);
+                    transaction.setTransferToAccount(transferToAccount);
                 }
+
+                if (targetAccount == null || !transaction.isValid()) status = TRANSACTION_CREATION_FAILED_STATUS;
+
+                LOG.log(Logger.Action.ALT_START, "will overdraw");
+                if ((TransactionType.Withdraw == transaction.getType() || TransactionType.TransferOut == transaction.getType()) //
+                        && targetAccount.getBalance().doubleValue() + transaction.getAmount().doubleValue() < 0) {
+                    status = TRANSACTION_OVERDRAWN_FAILED_STATUS;
+                } else {
+                    LOG.log(Logger.Action.ALT_ELSE, "else");
+
+                    try {
+                        transaction = new TransactionDaoImpl().createTransaction(transaction);
+                        status = SUCCESS_STATUS;
+
+                        LOG.log(Logger.Action.ALT_START, "transfer out");
+                        if (transaction != null && TransactionType.TransferOut == transaction.getType()) {
+                            Transaction toTrans = transaction.cloneForTransfer();
+                            new TransactionDaoImpl().createTransaction(toTrans);
+                        }
+                        LOG.log(Logger.Action.ALT_END);
+                    } catch (Exception e) {
+                        throw new ServletException(e);
+                    }
+                }
+                LOG.log(Logger.Action.ALT_END);
+
+                transaction.setStatus(status);
             }
+            LOG.log(Logger.Action.ALT_END);
+
         } finally {
             LOG.log(Logger.Action.RETURN, "transaction");
         }

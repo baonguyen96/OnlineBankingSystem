@@ -1,0 +1,38 @@
+#![User Login]
+user:Actor
+webBrowser:WebBrowser
+JsonServletBase:JsonServletBase[a]
+LoginController:LoginController[a]
+UserDaoImpl:UserDaoImpl[a]
+DbManager:DbManager[a]
+Utilities:Utilities[a]
+
+user:webBrowser.
+webBrowser:login status=JsonServletBase.doPost(request, response)
+
+JsonServletBase:is valid session required=LoginController.requireValidSession
+
+JsonServletBase:payload text=JsonServletBase.readRequestAsString(request)
+
+JsonServletBase[1]:java objects=JsonServletBase.jsonToObject(JSON)
+
+JsonServletBase[1]:login status=LoginController.processPost(request, response, login request)
+
+[c:alt username != null && password != null]
+	LoginController:user=UserDaoImpl.validateUser(login)
+
+	UserDaoImpl:dbConnection=DbManager.getConnection
+
+	UserDaoImpl:user=UserDaoImpl.loadUser(dbConnection, username, password)
+
+	UserDaoImpl:encryptedPassword=Utilities.hash(passwordToEncrypt)
+
+	[c:alt session created]
+		LoginController:user session created=JsonServletBase.createNewUserSession(request, user)
+
+	[/c]
+[/c]
+JsonServletBase[1]:JSON=JsonServletBase.objectToJson(objects to convert)
+
+JsonServletBase[1]:=JsonServletBase.writeJsonResponse(response, returnJsonString)
+

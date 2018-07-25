@@ -1,0 +1,27 @@
+#![Get All Accounts]
+user:Actor
+webBrowser:WebBrowser
+JsonServletBase:JsonServletBase[a]
+AccountController:AccountController[a]
+AccountDaoImpl:AccountDaoImpl[a]
+DbManager:DbManager[a]
+
+user:webBrowser.
+webBrowser:accounts=JsonServletBase.doGet(request, response)
+
+JsonServletBase:is valid session required=AccountController.requireValidSession
+
+JsonServletBase:accounts=AccountController.processGetAll(request, response)
+
+AccountController:logged in user=JsonServletBase.getUserFromSession(request)
+
+[c:alt user != null]
+	AccountController:userWithAccounts=AccountDaoImpl.loadAccounts(user)
+
+	AccountDaoImpl:dbConnection=DbManager.getConnection
+
+[/c]
+JsonServletBase:JSON=JsonServletBase.objectsToJson(objects to convert)
+
+JsonServletBase[1]:=JsonServletBase.writeJsonResponse(response, returnJsonString)
+

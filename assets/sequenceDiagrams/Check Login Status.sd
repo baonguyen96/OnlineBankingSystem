@@ -1,0 +1,19 @@
+#![Check Login Status]
+user:Actor
+webBrowser:WebBrowser
+JsonServletBase:JsonServletBase[a]
+StatusController:StatusController[a]
+
+user:webBrowser.
+webBrowser:logged-in status=JsonServletBase.doGet(request, response)
+
+JsonServletBase:is valid session required=StatusController.requireValidSession
+
+JsonServletBase:logged-in status=StatusController.processGet(request, response)
+
+StatusController:logged in user=JsonServletBase.getUserFromSession(request)
+
+JsonServletBase[1]:JSON=JsonServletBase.objectToJson(objects to convert)
+
+JsonServletBase[1]:=JsonServletBase.writeJsonResponse(response, returnJsonString)
+

@@ -64,24 +64,22 @@ public class AccountController extends JsonServletBase<Account> {
 
         Account retval = null;
         User user = getUserFromSession(request);
+        LOG.log(Logger.Action.ALT_START, "user != null");
         if (user != null) {
             LOG.info("AccountController.processGet(): Loaded User: " + user.getUsername());
+
             user = getAccountDao().loadAccounts(user);
+            Account account = user.getAccountByHashCode(accountId);
 
-            for (Account account : user.getAccounts()) {
-                LOG.info("AccountController.processGet(): Checking account: " + account.getName() + "(" + account.hashCode() + ") to see if it's hashCode == " + accountId);
-
-                if (account.hashCode() == accountId) {
-                    LOG.info("AccountController.processGet(): Account id matches, loading transactions");
-                    retval = getTransactionDao().loadTransactions(account);
-                    retval.setStatus(SUCCESS_STATUS);
-                    break;
-                }
+            LOG.log(Logger.Action.ALT_START, "account != null");
+            if (account != null) {
+                LOG.info("AccountController.processGet(): Account id matches, loading transactions");
+                retval = getTransactionDao().loadTransactions(account);
+                retval.setStatus(SUCCESS_STATUS);
             }
-
-        } else {
-            LOG.error("AccountController.processGetAll(): user was unexpectedly null");
+            LOG.log(Logger.Action.ALT_END);
         }
+        LOG.log(Logger.Action.ALT_END);
 
         LOG.log(Logger.Action.RETURN, "account");
         return retval;
@@ -92,11 +90,11 @@ public class AccountController extends JsonServletBase<Account> {
         LOG.setScenarioName("Get All Accounts");
         LOG.log(Logger.Action.BEGIN, "request", "response");
         User user = getUserFromSession(request);
+        LOG.log(Logger.Action.ALT_START, "user != null");
         if (user != null) {
             user = new AccountDaoImpl().loadAccounts(user);
-        } else {
-            LOG.error("AccountController.processGetAll(): user was unexpectedly null");
         }
+        LOG.log(Logger.Action.ALT_END);
 
         LOG.log(Logger.Action.RETURN, "accounts");
         return user.getAccounts();
@@ -111,15 +109,14 @@ public class AccountController extends JsonServletBase<Account> {
         LOG.setScenarioName("Create Account");
         LOG.log(Logger.Action.BEGIN, "request", "response", "account");
 
+        account.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
+
         try {
             User user = getUserFromSession(request);
-            if (user == null || account == null) {
-                account = new Account();
-                account.setStatus(ACCOUNT_CREATION_FAILES_STATUS);
-            } else {
-                LOG.info(user.toString());
-                if (account.getName() == null) account.setStatus(REQUIRED_FIELDS_MISSING_STATUS);
-                else {
+            LOG.log(Logger.Action.ALT_START, "user != null && account != null");
+            if (user != null && account != null) {
+                LOG.log(Logger.Action.ALT_START, "account.getName() != null");
+                if (account.getName() != null) {
                     account.setBalance(new BigDecimal(0));
                     account.setUser(user);
                     try {
@@ -128,11 +125,15 @@ public class AccountController extends JsonServletBase<Account> {
                         throw new ServletException(e);
                     }
 
-                    if (account != null) {
-                        account.setStatus(SUCCESS_STATUS);
-                    }
+                    if (account != null) account.setStatus(SUCCESS_STATUS);
                 }
+                LOG.log(Logger.Action.ALT_END);
+            } else {
+                account = new Account();
+                account.setStatus(ACCOUNT_CREATION_FAILES_STATUS);
             }
+            LOG.log(Logger.Action.ALT_END);
+
             return account;
         } finally {
             LOG.log(Logger.Action.RETURN, "account");

@@ -1,0 +1,81 @@
+#![Process Transaction]
+user:Actor
+webBrowser:WebBrowser
+JsonServletBase:JsonServletBase[a]
+TransactionController:TransactionController[a]
+AccountDaoImpl:AccountDaoImpl[a]
+DbManager:DbManager[a]
+User:User[a]
+Transaction:Transaction[a]
+TransactionDaoImpl:TransactionDaoImpl[a]
+
+user:webBrowser.
+webBrowser:transaction=JsonServletBase.doPost(request, response)
+
+JsonServletBase:is valid session required=TransactionController.requireValidSession
+
+JsonServletBase:payload text=JsonServletBase.readRequestAsString(request)
+
+JsonServletBase[1]:java objects=JsonServletBase.jsonToObject(JSON)
+
+JsonServletBase[1]:transaction=TransactionController.processPost(request, response, transaction)
+
+TransactionController:requested variable=JsonServletBase.getUriPathVariableAsInteger(request, varName)
+
+TransactionController:requested variable=JsonServletBase.getUriPathVariableAsInteger(request, varName)
+
+TransactionController:logged in user=JsonServletBase.getUserFromSession(request)
+
+[c:alt account != null && transactionAmount != null]
+	TransactionController:userWithAccounts=AccountDaoImpl.loadAccounts(user)
+
+	AccountDaoImpl:dbConnection=DbManager.getConnection
+
+	TransactionController:account=User.getAccountByHashCode(accountHashCode)
+
+	TransactionController:account=User.getAccountByHashCode(accountHashCode)
+
+	TransactionController:boolean=Transaction.isValid
+
+	[c:alt will overdraw]
+		--[else]
+		TransactionController:transaction=TransactionDaoImpl.createTransaction(transaction)
+
+		TransactionDaoImpl:boolean=Transaction.isValid
+
+		TransactionDaoImpl:dbConnection=DbManager.getConnection
+
+		TransactionDaoImpl:=AccountDaoImpl.updateBalance(account)
+
+		AccountDaoImpl:dbConnection=DbManager.getConnection
+
+		AccountDaoImpl:account=AccountDaoImpl.getAccountById(dbConnection, user, accountHashCode)
+
+		AccountDaoImpl:dbConnection=DbManager.getConnection
+
+		[c:alt transfer out]
+			TransactionController:transfer to transaction=Transaction.cloneForTransfer
+
+			Transaction:boolean=Transaction.isValid
+
+			TransactionController:transaction=TransactionDaoImpl.createTransaction(transaction)
+
+			TransactionDaoImpl:boolean=Transaction.isValid
+
+			TransactionDaoImpl:dbConnection=DbManager.getConnection
+
+			TransactionDaoImpl:=AccountDaoImpl.updateBalance(account)
+
+			AccountDaoImpl:dbConnection=DbManager.getConnection
+
+			AccountDaoImpl:account=AccountDaoImpl.getAccountById(dbConnection, user, accountHashCode)
+
+			AccountDaoImpl:dbConnection=DbManager.getConnection
+
+		[/c]
+	[/c]
+[/c]
+JsonServletBase:JSON=JsonServletBase.objectToJson(objects to convert)
+
+JsonServletBase[1]:=JsonServletBase.writeJsonResponse(response, returnJsonString)
+
