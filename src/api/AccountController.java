@@ -130,7 +130,7 @@ public class AccountController extends JsonServletBase<Account> {
                 LOG.log(Logger.Action.ALT_END);
             } else {
                 account = new Account();
-                account.setStatus(ACCOUNT_CREATION_FAILES_STATUS);
+                account.setStatus(ACCOUNT_CREATION_FAILED_STATUS);
             }
             LOG.log(Logger.Action.ALT_END);
 
